@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.adminLogin = void 0;
 const userModel_1 = __importDefault(require("../models/userModel"));
 const generateToken_1 = require("../utils/generateToken");
+const verifyModel_1 = __importDefault(require("../models/verifyModel"));
 const adminLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     const admin = yield userModel_1.default.findOne({ email });
@@ -25,12 +26,14 @@ const adminLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const accessToken = (0, generateToken_1.generateAccessToken)(admin._id.toString());
         const refreshToken = (0, generateToken_1.generateRefreshToken)(admin._id.toString());
         const user = yield userModel_1.default.updateOne({ _id: admin._id }, { $set: { token: accessToken } });
-        // if(!user){
-        //   res.status(401).json({
-        //     success: false,
-        //     message: "something went wrong",
-        //   });
-        // }
+        //const verifyuser = await Verify.updateOne({ _id: admin._id }, { $set: { token: accessToken } });
+        const verifyuser = yield verifyModel_1.default.create({ user_id: admin._id, token: accessToken });
+        if (!verifyuser) {
+            res.status(401).json({
+                success: false,
+                message: "something went wrong",
+            });
+        }
         res.status(200).send({
             success: true,
             message: "login successfully",

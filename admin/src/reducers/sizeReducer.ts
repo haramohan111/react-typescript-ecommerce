@@ -30,6 +30,13 @@ export const sizeReducer = (state: SizeState = initialSizeState, action: Action)
             return { loading: false, sizes: action.payload };
         case LIST_SIZE_FAIL:
             return { loading: false, error: action.payload, sizes: [] };
+
+            case LIST_SIZE_REQUEST:
+                return { loading: true, sizes: [] };
+            case LIST_SIZE_SUCCESS:
+                return { loading: false, sizes: action.payload };
+            case LIST_SIZE_FAIL:
+                return { loading: false, error: action.payload, sizes: [] };
         default:
             return state;
     }

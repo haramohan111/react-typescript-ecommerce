@@ -19,7 +19,7 @@ import CIcon from '@coreui/icons-react';
 import { cilLockLocked, cilUser } from '@coreui/icons';
 import { adminLogin } from '../../../action/userAction';
 import { ToastContainer, toast } from 'react-toastify';
-import Spinner from './Spinner';
+import Spinner from '../spiner/Spinner';
 import { ThunkDispatch } from 'redux-thunk';
 import { AnyAction } from 'redux';
 
@@ -35,13 +35,20 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("admin@gmail.com");
   const [password, setPassword] = useState("123123");
+  const [isLoading, setIsLoading] = useState<string>("");
   const userLogin = useSelector((state: RootState) => state.userreducer);
   const { error, userinfo } = userLogin;
 
-  const onUserSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onUserSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(email, password);
-    dispatch(adminLogin(email, password, navigate, toast));
+    setIsLoading(" Login Successfully")
+    setTimeout(async () => {
+      try {
+        await dispatch(adminLogin(email, password, navigate, toast));
+      } finally {
+        setIsLoading("");
+      }
+    }, 1000)
   };
 
   return (
@@ -56,15 +63,16 @@ const Login: React.FC = () => {
                   <CForm onSubmit={onUserSubmit}>
                     <h1>Admin</h1>
                     <p className="text-medium-emphasis">Sign In to your account</p>
+                    <p style={{color:'green'}}>{isLoading}</p>
                     <p color="danger">{error ? error : ''}</p>
                     <CInputGroup className="mb-3">
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
                       </CInputGroupText>
-                      <CFormInput 
-                        placeholder="Username" 
-                        autoComplete="username" 
-                        onChange={(e) => setEmail(e.target.value)} 
+                      <CFormInput
+                        placeholder="Username"
+                        autoComplete="username"
+                        onChange={(e) => setEmail(e.target.value)}
                       />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
@@ -83,7 +91,9 @@ const Login: React.FC = () => {
                         <CButton color="primary" type="submit" className="px-4">
                           Login
                         </CButton>
+                        
                       </CCol>
+
                     </CRow>
                   </CForm>
                 </CCardBody>

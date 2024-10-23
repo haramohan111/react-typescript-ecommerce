@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, ChangeEvent, FormEvent } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { activeCategory, addCategory, manageCategory, deleteCategory, deleteAllCategory } from '../../../action/categoryAction'
+import { activeCategory, manageCategory, deleteCategory, deleteAllCategory } from '../../../action/categoryAction'
+
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import ReactPaginate from 'react-paginate'
@@ -115,10 +116,11 @@ const AddSize: React.FC = () => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const data = { name: inputName, status: inputStatus }
-    dispatch(addCategory(data, toast))
-    setIsSubmitted(true)
-    setInputName('')
-    setInputStatus('')
+    console.log(data)
+    // dispatch(addCategory(data, toast))
+    // setIsSubmitted(true)
+    // setInputName('')
+    // setInputStatus('')
   }
 
   useEffect(() => {

@@ -68,29 +68,29 @@ exports.loginUser = (0, express_async_handler_1.default)((req, res) => __awaiter
     //     console.log('Password Match:', isMatch)
     // }
     if (user)
-        console.log("check", yield user.matchPassword(password));
-    if (user && (yield user.matchPassword(password))) {
-        console.log(user);
-        const accessToken = (0, generateToken_1.generateAccessToken)(user._id.toString());
-        const refreshToken = (0, generateToken_1.generateRefreshToken)(user._id.toString());
-        res.cookie("accessToken", accessToken);
-        if (user) {
-            // Ensure _id is asserted to be a string
-            var userId = user._id.toString();
-            res.status(200).send({
-                success: true,
-                message: "User login successfully",
-                accessToken,
-                refreshToken,
+        //console.log("check",await user.matchPassword(password))
+        if (user && (yield user.matchPassword(password))) {
+            console.log(user);
+            const accessToken = (0, generateToken_1.generateAccessToken)(user._id.toString());
+            const refreshToken = (0, generateToken_1.generateRefreshToken)(user._id.toString());
+            res.cookie("accessToken", accessToken);
+            if (user) {
+                // Ensure _id is asserted to be a string
+                var userId = user._id.toString();
+                res.status(200).send({
+                    success: true,
+                    message: "User login successfully",
+                    accessToken,
+                    refreshToken,
+                });
+            }
+        }
+        else {
+            res.status(401).send({
+                success: false,
+                message: "Invalid mobile or password"
             });
         }
-    }
-    else {
-        res.status(401).send({
-            success: false,
-            message: "Invalid mobile or password"
-        });
-    }
 }));
 exports.getUserProfile = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.send("hhhhh");

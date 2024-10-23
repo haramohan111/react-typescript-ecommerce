@@ -1,15 +1,6 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../context/auth";
+
 const Spinner = () => {
-  const [auth] = useAuth();
-  const navigate = useNavigate()
-  console.log(auth.token)
-  // useEffect(() => {
-  //   if (auth.token){
-  //     navigate('/dashboard')
-  //   }
-  // }, [])
   return (
     <>  
       <div

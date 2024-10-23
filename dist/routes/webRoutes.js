@@ -21,6 +21,7 @@ const adminloginController_1 = require("../controller/adminloginController");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const orderController_1 = require("../controller/orderController");
 const userModel_1 = __importDefault(require("../models/userModel"));
+const verifyModel_1 = __importDefault(require("../models/verifyModel"));
 const router = express_1.default.Router();
 router.post('/brand', (req, res, next) => (0, brandController_1.addBrand)(req, res));
 router.post('/color', (req, res, next) => (0, colorController_1.addColor)(req, res, next));
@@ -102,16 +103,17 @@ router.post('/refresh', (req, res) => __awaiter(void 0, void 0, void 0, function
 }));
 router.post('/verify', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { atoken } = req.body;
-    console.log("bb", atoken);
     try {
-        const decoded = jsonwebtoken_1.default.verify(atoken, process.env.ACCESS_TOKEN_SECRET);
-        console.log(decoded);
-        if (!decoded) {
-            res.status(401).send('Invalid token');
+        const admin = yield verifyModel_1.default.findOne({ token: atoken });
+        if (!admin) {
+            res.status(401).send({ success: false, message: 'Session out' });
+        }
+        else {
+            res.status(200).send({ success: true, message: 'Session In' });
         }
     }
     catch (error) {
-        res.status(401).send('Invalid error token');
+        res.status(401).send('Logout Successfully');
     }
 }));
 exports.default = router;

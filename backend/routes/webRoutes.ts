@@ -22,6 +22,7 @@ import {
   orderPagination
 } from '../controller/orderController';
 import userModel from '../models/userModel';
+import Verify from '../models/verifyModel';
 
 const router = express.Router();
 
@@ -107,15 +108,17 @@ router.post('/refresh', async (req: Request, res: Response) => {
 
 router.post('/verify', async (req: Request, res: Response) => {
   const { atoken } = req.body;
-  console.log("bb",atoken)
+
   try {
-    const decoded = jwt.verify(atoken, process.env.ACCESS_TOKEN_SECRET!) as { id: string };
-    console.log(decoded)
-    if (!decoded) {
-      res.status(401).send('Invalid token');
+    const admin = await Verify.findOne({ token:atoken })
+
+    if (!admin) {
+      res.status(401).send({success:false,message:'Session out'});
+    }else{
+      res.status(200).send({success:true,message:'Session In'});
     }
   } catch (error) {
-    res.status(401).send('Invalid error token');
+    res.status(401).send('Logout Successfully');
   }
 });
 

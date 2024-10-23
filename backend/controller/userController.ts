@@ -97,7 +97,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response): Promi
     //     console.log('Password Match:', isMatch)
     // }
    if(user)
-    console.log("check",await user.matchPassword(password))
+    //console.log("check",await user.matchPassword(password))
     if (user && await user.matchPassword(password)) {
         console.log(user)
         const accessToken = generateAccessToken(user._id.toString());
