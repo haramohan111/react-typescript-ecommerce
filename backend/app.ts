@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { errorHandler } from "./middleware/errorMiddleware";
 import { protect } from "./middleware/authMiddleware";
+import moment from 'moment-timezone';
 import colors from 'colors';
 import cors from "cors";
 import dotenv from "dotenv";
@@ -15,6 +16,11 @@ app.use(cors({
   methods: ["POST", "GET", "PUT", "DELETE"],
   credentials: true
 }))
+
+
+// Get the current date and time in India (IST)
+const indiaTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+console.log(`Current date and time in India: ${indiaTime}`);
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))

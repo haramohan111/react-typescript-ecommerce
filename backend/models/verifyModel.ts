@@ -1,10 +1,11 @@
 import mongoose, { Schema, Document, Model } from 'mongoose'
+import moment from 'moment-timezone';
 
 export interface IVerify extends Document {
     _id: string;
     user_id: String;
     token: string;
-    expireAt: String;
+    expireAt: Date;
 }
 
 const verifySchema: Schema<IVerify> = new Schema({
@@ -13,13 +14,13 @@ const verifySchema: Schema<IVerify> = new Schema({
         ref: "User",
         required: true
     },
-    "token": {
+    token: {
         type: String,
     },
     expireAt: {
         type: Date,
-        default: () => Date.now(),
-        index: { expires: '1440' }
+        default: () => moment().tz('Asia/Kolkata').add(24, 'minutes').toDate(),
+        index: { expires: 1440 }
     }
 }, { timestamps: true })
 

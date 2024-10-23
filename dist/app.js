@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const errorMiddleware_1 = require("./middleware/errorMiddleware");
 const authMiddleware_1 = require("./middleware/authMiddleware");
+const moment_timezone_1 = __importDefault(require("moment-timezone"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const db_1 = __importDefault(require("./config/db"));
@@ -17,6 +18,9 @@ app.use((0, cors_1.default)({
     methods: ["POST", "GET", "PUT", "DELETE"],
     credentials: true
 }));
+// Get the current date and time in India (IST)
+const indiaTime = (0, moment_timezone_1.default)().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+console.log(`Current date and time in India: ${indiaTime}`);
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use(errorMiddleware_1.errorHandler);
