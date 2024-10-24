@@ -104,7 +104,7 @@ router.post('/refresh', (req, res) => __awaiter(void 0, void 0, void 0, function
 router.post('/verify', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { atoken } = req.body;
     try {
-        const decode = jsonwebtoken_1.default.verify(atoken, process.env.ACCESS_TOKEN_SECRET);
+        const decode = jsonwebtoken_1.default.verify(atoken, process.env.REFRESH_TOKEN_SECRET);
         console.log(decode.id);
         const decodeUser = yield verifyModel_1.default.findOne({ user_id: decode.id });
         console.log(decodeUser);

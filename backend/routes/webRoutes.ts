@@ -112,7 +112,7 @@ router.post('/verify', async (req: Request, res: Response) => {
   const { atoken } = req.body;
 
   try {
-    const decode = jwt.verify(atoken, process.env.ACCESS_TOKEN_SECRET!) as DecodedToken;
+    const decode = jwt.verify(atoken, process.env.REFRESH_TOKEN_SECRET!) as DecodedToken;
 console.log(decode.id)
     const decodeUser = await Verify.findOne({user_id:decode.id});
     console.log(decodeUser)
