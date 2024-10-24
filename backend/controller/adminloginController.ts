@@ -17,15 +17,19 @@ export const adminLogin = async (req: Request, res: Response): Promise<void> => 
     const refreshToken = generateRefreshToken(admin._id.toString());
     
     const user = await User.updateOne({ _id: admin._id }, { $set: { token: accessToken } });
-    //const verifyuser = await Verify.updateOne({ _id: admin._id }, { $set: { token: accessToken } });
-    const verifyuser = await Verify.create({user_id: admin._id,token: accessToken  });
-
-    if(!verifyuser){
-      res.status(401).json({
-        success: false,
-        message: "something went wrong",
-      });
+    const verify = await Verify.findOne({user_id:admin._id});
+    let verifyuser;
+    if(!verify){
+    verifyuser = await Verify.create({user_id: admin._id,token: accessToken  });
     }
+
+
+    // if(!verifyuser){
+    //   res.status(401).json({
+    //     success: false,
+    //     message: "something went wrong",
+    //   });
+    // }
     res.status(200).send({
       success: true,
       message: "login successfully",

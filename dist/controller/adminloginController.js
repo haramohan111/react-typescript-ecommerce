@@ -26,14 +26,17 @@ const adminLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const accessToken = (0, generateToken_1.generateAccessToken)(admin._id.toString());
         const refreshToken = (0, generateToken_1.generateRefreshToken)(admin._id.toString());
         const user = yield userModel_1.default.updateOne({ _id: admin._id }, { $set: { token: accessToken } });
-        //const verifyuser = await Verify.updateOne({ _id: admin._id }, { $set: { token: accessToken } });
-        const verifyuser = yield verifyModel_1.default.create({ user_id: admin._id, token: accessToken });
-        if (!verifyuser) {
-            res.status(401).json({
-                success: false,
-                message: "something went wrong",
-            });
+        const verify = yield verifyModel_1.default.findOne({ user_id: admin._id });
+        let verifyuser;
+        if (!verify) {
+            verifyuser = yield verifyModel_1.default.create({ user_id: admin._id, token: accessToken });
         }
+        // if(!verifyuser){
+        //   res.status(401).json({
+        //     success: false,
+        //     message: "something went wrong",
+        //   });
+        // }
         res.status(200).send({
             success: true,
             message: "login successfully",

@@ -105,14 +105,18 @@ router.post('/refresh', async (req: Request, res: Response) => {
     res.status(401).send('Invalid refresh token');
   }
 });
-
+interface DecodedToken extends JwtPayload {
+  id: string;
+}
 router.post('/verify', async (req: Request, res: Response) => {
   const { atoken } = req.body;
 
   try {
-    const admin = await Verify.findOne({ token:atoken })
-
-    if (!admin) {
+    const decode = jwt.verify(atoken, process.env.ACCESS_TOKEN_SECRET!) as DecodedToken;
+console.log(decode.id)
+    const decodeUser = await Verify.findOne({user_id:decode.id});
+    console.log(decodeUser)
+    if (!decodeUser) {
       res.status(401).send({success:false,message:'Session out'});
     }else{
       res.status(200).send({success:true,message:'Session In'});
