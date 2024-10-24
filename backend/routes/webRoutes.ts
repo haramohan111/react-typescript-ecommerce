@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { addBrand, brandPagination, getBrand } from '../controller/brandController';
 import {
   addColor,
+  colorPagination,
   getColor
 } from '../controller/colorController';
 import {
@@ -28,17 +29,21 @@ import Verify from '../models/verifyModel';
 const router = express.Router();
 
 router.post('/addbrand', (req: Request, res: Response, next: NextFunction) => addBrand(req, res));
-router.get('/brandpagination', (req: Request, res: Response, next: NextFunction) => brandPagination(req, res, next));
-router.post('/color', (req: Request, res: Response, next: NextFunction) => addColor(req, res, next));
-router.post('/addsize', (req: Request, res: Response, next: NextFunction) => addSize(req, res, next));
-router.get('/sizepagination', (req: Request, res: Response, next: NextFunction) => sizePagination(req, res, next));
-
-router.get('/getsize', (req: Request, res: Response, next: NextFunction) => getSize(req, res, next));
-router.post('/seller', (req: Request, res: Response, next: NextFunction) => addSeller(req, res, next));
 router.get('/getbrand', (req: Request, res: Response, next: NextFunction) => getBrand(req, res, next));
+router.get('/brandpagination', (req: Request, res: Response, next: NextFunction) => brandPagination(req, res, next));
+
+router.post('/addcolor', (req: Request, res: Response, next: NextFunction) => addColor(req, res, next));
+router.get('/colorpagination', (req: Request, res: Response, next: NextFunction) => colorPagination(req, res, next));
 router.get('/getcolor', (req: Request, res: Response, next: NextFunction) => getColor(req, res, next));
 
+router.post('/addsize', (req: Request, res: Response, next: NextFunction) => addSize(req, res, next));
+router.get('/sizepagination', (req: Request, res: Response, next: NextFunction) => sizePagination(req, res, next));
+router.get('/getsize', (req: Request, res: Response, next: NextFunction) => getSize(req, res, next));
+
+router.post('/addseller', (req: Request, res: Response, next: NextFunction) => addSeller(req, res, next));
+router.get('/sellerpagination', (req: Request, res: Response, next: NextFunction) => brandPagination(req, res, next));
 router.get('/getseller', (req: Request, res: Response, next: NextFunction) => getSeller(req, res, next));
+
 router.post('/adminlogin', (req: Request, res: Response, next: NextFunction) => adminLogin(req, res));
 // router.get("/authcheck/:id", (req: Request, res: Response, next: NextFunction) => authCheck(req, res, next));
 router.post('/createorder', (req: Request, res: Response, next: NextFunction) => createOrder(req, res, next));
@@ -64,7 +69,7 @@ router.post('/logout', async (req: Request, res: Response) => {
     //console.log({ web: "web", id: (decoded as JwtPayload).id, token });
 
     const user = await userModel.updateOne({ _id:(decoded as JwtPayload).id }, { $set: { token: "" } });
-    console.log((decoded as JwtPayload).id)
+
     const verify = await Verify.deleteOne({ user_id: (decoded as JwtPayload).id })
     if (user && verify) {
       const dbToken = await userModel.findOne({ token });

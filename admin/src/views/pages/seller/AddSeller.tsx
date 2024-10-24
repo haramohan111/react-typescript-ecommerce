@@ -1,6 +1,6 @@
 import React, { ChangeEvent, FormEvent, useEffect,useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { activeCategory, addCategory,manageCategory,deleteCategory,deleteAllCategory  } from '../../../action/categoryAction';
+import { activeCategory, addCategory,deleteCategory,deleteAllCategory  } from '../../../action/categoryAction';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ReactPaginate from 'react-paginate';
@@ -37,6 +37,7 @@ import {
 
 import { ThunkDispatch } from 'redux-thunk';
 import { AnyAction } from 'redux';
+import { selerPagination } from '../../../action/sellerAction';
 
 interface Category {
   _id: string;
@@ -49,7 +50,7 @@ interface RootState {
   categoryList: {
     error: string;
     loading: boolean;
-    category: { result: Category[] };
+    sellers: { result: Category[] };
   };
 }
 
@@ -64,7 +65,7 @@ const AddSeller: React.FC = () => {
   const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
   
   const categoryList = useSelector((state: RootState) => state.categoryList);
-  const { error, loading, category } = categoryList;
+  const { error, loading, sellers } = categoryList;
   const [limit, setLimit] = useState<number>(3);
   const [pageCount, setPageCount] = useState<number>(1);
   const currentPage = useRef<number>(1);
@@ -76,12 +77,12 @@ const AddSeller: React.FC = () => {
   const handlePageClick = (e: { selected: number }) => {
     currentPage.current = e.selected + 1;
     setCurrentPageNum(currentPage.current);
-    dispatch(manageCategory(currentPage.current, limit, search, setPageCount, setPageindex));
+    dispatch(selerPagination(currentPage.current, limit, search, setPageCount, setPageindex));
   };
 
   const handleKeyPress = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    dispatch(manageCategory(currentPage.current, limit, e.target.value, setPageCount, setPageindex));
+    dispatch(selerPagination(currentPage.current, limit, e.target.value, setPageCount, setPageindex));
     setIsSubmitted(true);
   };
 
@@ -99,7 +100,7 @@ const AddSeller: React.FC = () => {
 
   const handlealldelete = async () => {
     const checkedinputvalue = categoryData.filter(user => user.isChecked).map(user => user._id);
-    if (category?.result?.length === 1) {
+    if (sellers?.result?.length === 1) {
       const pageBack = currentPage.current - 1;
       setCurrentPageNum(pageBack);
       setIsSubmitted(true);
@@ -120,7 +121,7 @@ const AddSeller: React.FC = () => {
     e.preventDefault();
     const data = { id };
     dispatch(deleteCategory(data, toast));
-    if (category?.result?.length === 1) {
+    if (sellers?.result?.length === 1) {
       const pageBack = currentPage.current - 1;
       setCurrentPageNum(pageBack);
       setIsSubmitted(true);
@@ -139,16 +140,16 @@ const AddSeller: React.FC = () => {
 
   useEffect(() => {
     if (isSubmitted) {
-      dispatch(manageCategory(currentPageNum, limit, search, setPageCount, setPageindex));
+      dispatch(selerPagination(currentPageNum, limit, search, setPageCount, setPageindex));
       setIsSubmitted(false);
     }
-    dispatch(manageCategory(currentPageNum, limit, search, setPageCount, setPageindex));
-    setCategoryData(category?.result || []);
-  }, [dispatch, search, isSubmitted, currentPageNum, limit, category?.result]);
+    dispatch(selerPagination(currentPageNum, limit, search, setPageCount, setPageindex));
+    setCategoryData(sellers?.result || []);
+  }, [dispatch, search, isSubmitted, currentPageNum, limit, sellers?.result]);
 
   useEffect(() => {
     if (categoryList) {
-      setCategoryData(category?.result || []);
+      setCategoryData(sellers?.result || []);
     }
   }, [categoryList]);
     return (<>

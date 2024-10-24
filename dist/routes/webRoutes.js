@@ -24,14 +24,16 @@ const userModel_1 = __importDefault(require("../models/userModel"));
 const verifyModel_1 = __importDefault(require("../models/verifyModel"));
 const router = express_1.default.Router();
 router.post('/addbrand', (req, res, next) => (0, brandController_1.addBrand)(req, res));
+router.get('/getbrand', (req, res, next) => (0, brandController_1.getBrand)(req, res, next));
 router.get('/brandpagination', (req, res, next) => (0, brandController_1.brandPagination)(req, res, next));
-router.post('/color', (req, res, next) => (0, colorController_1.addColor)(req, res, next));
+router.post('/addcolor', (req, res, next) => (0, colorController_1.addColor)(req, res, next));
+router.get('/colorpagination', (req, res, next) => (0, colorController_1.colorPagination)(req, res, next));
+router.get('/getcolor', (req, res, next) => (0, colorController_1.getColor)(req, res, next));
 router.post('/addsize', (req, res, next) => (0, sizeController_1.addSize)(req, res, next));
 router.get('/sizepagination', (req, res, next) => (0, sizeController_1.sizePagination)(req, res, next));
 router.get('/getsize', (req, res, next) => (0, sizeController_1.getSize)(req, res, next));
-router.post('/seller', (req, res, next) => (0, sellerController_1.addSeller)(req, res, next));
-router.get('/getbrand', (req, res, next) => (0, brandController_1.getBrand)(req, res, next));
-router.get('/getcolor', (req, res, next) => (0, colorController_1.getColor)(req, res, next));
+router.post('/addseller', (req, res, next) => (0, sellerController_1.addSeller)(req, res, next));
+router.get('/sellerpagination', (req, res, next) => (0, brandController_1.brandPagination)(req, res, next));
 router.get('/getseller', (req, res, next) => (0, sellerController_1.getSeller)(req, res, next));
 router.post('/adminlogin', (req, res, next) => (0, adminloginController_1.adminLogin)(req, res));
 // router.get("/authcheck/:id", (req: Request, res: Response, next: NextFunction) => authCheck(req, res, next));
@@ -53,7 +55,6 @@ router.post('/logout', (req, res) => __awaiter(void 0, void 0, void 0, function*
         ;
         //console.log({ web: "web", id: (decoded as JwtPayload).id, token });
         const user = yield userModel_1.default.updateOne({ _id: decoded.id }, { $set: { token: "" } });
-        console.log(decoded.id);
         const verify = yield verifyModel_1.default.deleteOne({ user_id: decoded.id });
         if (user && verify) {
             const dbToken = yield userModel_1.default.findOne({ token });

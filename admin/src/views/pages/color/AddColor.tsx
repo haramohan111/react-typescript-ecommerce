@@ -1,6 +1,6 @@
 import React, { ChangeEvent, FormEvent, MouseEvent, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { activeCategory, addCategory, manageCategory, deleteCategory, deleteAllCategory } from '../../../action/categoryAction';
+import { activeColor, addColor, colorPagination, deleteColor, deleteAllcolor } from '../../../action/colorAction';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ReactPaginate from 'react-paginate';
@@ -38,27 +38,29 @@ import {
 import { ThunkDispatch } from 'redux-thunk';
 import { AnyAction } from 'redux';
 
-interface Category {
+interface color {
   _id: string;
   name: string;
   isChecked?: boolean;
-  status?:number;
+  status?: number;
   // Add other properties as needed
 }
 
-interface CategoryState {
+interface colorState {
   error: string;
   loading: boolean;
-  result: Category[];
+  colors: {
+    result:color[]
+  };
 }
 
 interface RootState {
-  categoryList: CategoryState;
+  colorreducer: colorState;
 }
 
 const AddColor: React.FC = () => {
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
-  const [categoryData, setCategoryData] = useState<Category[]>([]);
+  const [colorData, setcolorData] = useState<color[]>([]);
   const [isAllChecked, setIsAllChecked] = useState<boolean>(false);
   const [validated, setValidated] = useState<boolean>(false);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
@@ -66,8 +68,8 @@ const AddColor: React.FC = () => {
   const [inputStatus, setInputStatus] = useState<string>('');
   const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
 
-  const categoryList = useSelector((state: RootState) => state.categoryList);
-  const { error, loading, result } = categoryList;
+  const colorList = useSelector((state: RootState) => state.colorreducer);
+  const { error, loading, colors } = colorList;
   const [limit, setLimit] = useState<number>(3);
   const [pageCount, setPageCount] = useState<number>(1);
   const currentPage = useRef<number>(1);
@@ -78,41 +80,41 @@ const AddColor: React.FC = () => {
   const handlePageClick = (e: { selected: number }) => {
     currentPage.current = e.selected + 1;
     setCurrentPageNum(currentPage.current);
-    dispatch(manageCategory(currentPage.current, limit, search, setPageCount, setPageindex));
+    dispatch(colorPagination(currentPage.current, limit, search, setPageCount, setPageindex));
   };
 
   const handleKeyPress = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    dispatch(manageCategory(currentPage.current, limit, search, setPageCount, setPageindex));
+    dispatch(colorPagination(currentPage.current, limit, search, setPageCount, setPageindex));
     setIsSubmitted(true);
   };
 
   const handleSelectAllChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     if (name === 'selectAll') {
-      const checkedvalues = categoryData.map(user => ({ ...user, isChecked: checked }));
-      setCategoryData(checkedvalues);
+      const checkedvalues = colorData.map(user => ({ ...user, isChecked: checked }));
+      setcolorData(checkedvalues);
     } else {
-      const checkedvalue = categoryData.map(user =>
+      const checkedvalue = colorData.map(user =>
         user.name === name ? { ...user, isChecked: checked } : user
       );
-      setCategoryData(checkedvalue);
+      setcolorData(checkedvalue);
     }
   };
 
   const handlealldelete = async () => {
     const checkedinputvalue: string[] = [];
-    for (let i = 0; i < categoryData.length; i++) {
-      if (categoryData[i].isChecked) {
-        checkedinputvalue.push(categoryData[i]._id);
+    for (let i = 0; i < colorData.length; i++) {
+      if (colorData[i].isChecked) {
+        checkedinputvalue.push(colorData[i]._id);
       }
     }
-    if (result?.length === 1) {
+    if (colors?.result?.length === 1) {
       const pageBack = currentPage.current - 1;
       setCurrentPageNum(pageBack);
       setIsSubmitted(true);
     }
-    dispatch(deleteAllCategory(checkedinputvalue, toast));
+    dispatch(deleteAllcolor(checkedinputvalue, toast));
     setIsSubmitted(true);
   };
 
@@ -120,29 +122,29 @@ const AddColor: React.FC = () => {
     const target = e.target as HTMLButtonElement;
     const act = target.value === "Active" ? 0 : 1;
     const data = { id: id, status: act };
-    dispatch(activeCategory(data, toast));
+    dispatch(activeColor(data, toast));
     setIsSubmitted(true);
   };
 
   const handleChangeDelete = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     if (e.currentTarget instanceof HTMLButtonElement) {
-    const data = { id: id };
-    dispatch(deleteCategory(data, toast));
+      const data = { id: id };
+      dispatch(deleteColor(data, toast));
 
-    if (result?.length === 1) {
-      const pageBack = currentPage.current - 1;
-      setCurrentPageNum(pageBack);
+      if (colors?.result?.length === 1) {
+        const pageBack = currentPage.current - 1;
+        setCurrentPageNum(pageBack);
+        setIsSubmitted(true);
+      }
       setIsSubmitted(true);
     }
-    setIsSubmitted(true);
-  }
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = { name: inputName, status: inputStatus };
-    dispatch(addCategory(data, toast));
+    dispatch(addColor(data, toast));
     setIsSubmitted(true);
     setInputName('');
     setInputStatus('');
@@ -150,18 +152,18 @@ const AddColor: React.FC = () => {
 
   useEffect(() => {
     if (isSubmitted) {
-      dispatch(manageCategory(currentPageNum, limit, search, setPageCount, setPageindex));
+      dispatch(colorPagination(currentPageNum, limit, search, setPageCount, setPageindex));
     }
-    dispatch(manageCategory(currentPageNum, limit, search, setPageCount, setPageindex));
+    dispatch(colorPagination(currentPageNum, limit, search, setPageCount, setPageindex));
     setIsSubmitted(false);
-    setCategoryData(result);
+    setcolorData(colors?.result);
   }, [dispatch, search, isSubmitted]);
 
   useEffect(() => {
-    if (categoryList) {
-      setCategoryData(result);
+    if (colorList) {
+      setcolorData(colors?.result);
     }
-  }, [categoryList]);
+  }, [colorList]);
 
   return (<>
     <ToastContainer />
@@ -175,8 +177,17 @@ const AddColor: React.FC = () => {
       <CCol xs={12}>
         <CRow>
           <CCol md={3}>
-            <CFormLabel htmlFor="validationCustom01">Category</CFormLabel>
-            <CFormInput type="text" id="validationCustom01" name="categoryname" value={inputName || ''} onChange={(e) => setInputName(e.target.value)} defaultValue="" placeholder='Enter Category' required />
+            <CFormLabel htmlFor="validationCustom01">color</CFormLabel>
+            <CFormSelect id="validationCustom02" name="status" required aria-label="select example" value={inputStatus || ""} onChange={(e) => setInputName(e.target.value)}>
+              <option>Select color</option>
+              <option value="">Select a color</option>
+              <option value="red" style={{ color: 'red' }}>Red</option>
+              <option value="green" style={{ color: 'green' }}>Green</option>
+              <option value="blue" style={{ color: 'blue' }}>Blue</option>
+              <option value="yellow" style={{ color: 'yellow' }}>Yellow</option>
+              <option value="purple" style={{ color: 'purple' }}>Purple</option>
+
+            </CFormSelect>
             <CFormFeedback valid>Looks good!</CFormFeedback>
           </CCol>
         </CRow>
@@ -224,11 +235,11 @@ const AddColor: React.FC = () => {
                     <input
                       type="checkbox"
                       name="selectAll"
-                      checked={!categoryData?.some((user) => user?.isChecked !== true)}
+                      checked={!colorData?.some((user) => user?.isChecked !== true)}
                       onChange={handleSelectAllChange}
                     /></CTableHeaderCell>
                   <CTableHeaderCell scope="col">#</CTableHeaderCell>
-                  <CTableHeaderCell scope="col">Category</CTableHeaderCell>
+                  <CTableHeaderCell scope="col">color</CTableHeaderCell>
                   <CTableHeaderCell scope="col" className="text-primary">Status</CTableHeaderCell>
                   <CTableHeaderCell scope="col">Action</CTableHeaderCell>
                 </CTableRow>
@@ -236,7 +247,7 @@ const AddColor: React.FC = () => {
               <CTableBody>
 
                 {
-                  categoryData?.map((cat, index) => (
+                  colorData?.map((cat, index) => (
                     <CTableRow key={index}>
                       <CTableDataCell > <div key={cat.name}>
                         <input
@@ -250,14 +261,15 @@ const AddColor: React.FC = () => {
 
                         /></div></CTableDataCell>
                       <CTableHeaderCell scope="row">{pageindex + index + 1}</CTableHeaderCell>
-                      <CTableDataCell>{cat.name}</CTableDataCell>
+                      <CTableDataCell><span style={{backgroundColor: `${cat.name}`}}>{cat.name}</span>
+                      </CTableDataCell>
                       <CTableDataCell>
                         {cat.status == 1 ? <CButton component="input" type="button" color="success" value="Active" onClick={(e) => handleChange(e, cat._id)} /> :
                           <CButton component="input" type="button" color="danger" value="InActive" onClick={(e) => handleChange(e, cat._id)} />}
                       </CTableDataCell>
                       <CTableDataCell>
 
-                        <CNavLink to={`/category/editcategory/${cat?._id}`} color="primary" component={NavLink}>
+                        <CNavLink to={`/color/editcolor/${cat?._id}`} color="primary" component={NavLink}>
                           <CButton component="input" type="button" color="primary" value="Edit" />
                         </CNavLink>
                         <CButton component="input" type="button" color="danger" value="Delete" onClick={(e) => handleChangeDelete(e, cat._id)} />

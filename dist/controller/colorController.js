@@ -12,18 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getColor = exports.addColor = void 0;
+exports.getColor = exports.colorPagination = exports.addColor = void 0;
 const colorModel_1 = __importDefault(require("../models/colorModel"));
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 exports.addColor = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const data = [{
-                name: "red",
-                status: 1
-            }, {
-                name: "green",
-                status: 1
-            }];
+        const data = req.body;
         const color = yield colorModel_1.default.insertMany(data);
         res.status(200).send({
             success: true,
@@ -38,6 +32,40 @@ exports.addColor = (0, express_async_handler_1.default)((req, res) => __awaiter(
             error: e.message
         });
     }
+}));
+exports.colorPagination = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const search = req.query.search;
+    let category;
+    if (search) {
+        category = yield colorModel_1.default.find({ name: { $regex: search, $options: "i" } }).sort([['_id', -1]]);
+    }
+    else {
+        category = yield colorModel_1.default.find({}).sort([['_id', -1]]);
+    }
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.limit);
+    const startIndex = (page - 1) * limit;
+    const lastIndex = page * limit;
+    const results = {};
+    results.totalUser = category.length;
+    results.pageCount = Math.ceil(category.length / limit);
+    if (lastIndex < category.length) {
+        results.next = {
+            page: page + 1,
+        };
+    }
+    if (startIndex > 0) {
+        results.prev = {
+            page: page - 1,
+        };
+    }
+    results.pageindex = startIndex;
+    results.result = category.slice(startIndex, lastIndex);
+    res.status(200).send({
+        success: true,
+        message: "get all Color",
+        results
+    });
 }));
 exports.getColor = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const color = yield colorModel_1.default.find({});

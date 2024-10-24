@@ -1,4 +1,4 @@
-import { LIST_COLOR_FAIL, LIST_COLOR_REQUEST, LIST_COLOR_SUCCESS } from "../constants/colorConstants";
+import { ADD_COLOR_FAIL, ADD_COLOR_REQUEST, ADD_COLOR_SUCCESS, LIST_COLOR_FAIL, LIST_COLOR_REQUEST, LIST_COLOR_SUCCESS } from "../constants/colorConstants";
 
 interface Color {
     id: string;
@@ -29,6 +29,12 @@ export const colorReducer = (state: ColorState = initialColorState, action: Acti
         case LIST_COLOR_SUCCESS:
             return { loading: false, colors: action.payload };
         case LIST_COLOR_FAIL:
+            return { loading: false, error: action.payload, colors: [] };
+        case ADD_COLOR_REQUEST:
+            return { loading: true, colors: [] };
+        case ADD_COLOR_SUCCESS:
+            return { loading: false, colors: action.payload };
+        case ADD_COLOR_FAIL:
             return { loading: false, error: action.payload, colors: [] };
         default:
             return state;
