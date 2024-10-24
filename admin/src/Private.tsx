@@ -44,6 +44,8 @@ const PrivateRoute: React.FC = () => {
       setCheckauth(response.data.success);
     } catch (error) {
       console.error(error);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
     }finally {
       setIsLoading(false);
     }

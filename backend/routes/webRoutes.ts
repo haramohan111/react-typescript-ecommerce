@@ -1,12 +1,13 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { addBrand, getBrand } from '../controller/brandController';
+import { addBrand, brandPagination, getBrand } from '../controller/brandController';
 import {
   addColor,
   getColor
 } from '../controller/colorController';
 import {
   addSize,
-  getSize
+  getSize,
+  sizePagination
 } from '../controller/sizeController';
 import {
   addSeller,
@@ -26,13 +27,17 @@ import Verify from '../models/verifyModel';
 
 const router = express.Router();
 
-router.post('/brand', (req: Request, res: Response, next: NextFunction) => addBrand(req, res));
+router.post('/addbrand', (req: Request, res: Response, next: NextFunction) => addBrand(req, res));
+router.get('/brandpagination', (req: Request, res: Response, next: NextFunction) => brandPagination(req, res, next));
 router.post('/color', (req: Request, res: Response, next: NextFunction) => addColor(req, res, next));
-router.post('/size', (req: Request, res: Response, next: NextFunction) => addSize(req, res, next));
+router.post('/addsize', (req: Request, res: Response, next: NextFunction) => addSize(req, res, next));
+router.get('/sizepagination', (req: Request, res: Response, next: NextFunction) => sizePagination(req, res, next));
+
+router.get('/getsize', (req: Request, res: Response, next: NextFunction) => getSize(req, res, next));
 router.post('/seller', (req: Request, res: Response, next: NextFunction) => addSeller(req, res, next));
 router.get('/getbrand', (req: Request, res: Response, next: NextFunction) => getBrand(req, res, next));
 router.get('/getcolor', (req: Request, res: Response, next: NextFunction) => getColor(req, res, next));
-router.get('/getsize', (req: Request, res: Response, next: NextFunction) => getSize(req, res, next));
+
 router.get('/getseller', (req: Request, res: Response, next: NextFunction) => getSeller(req, res, next));
 router.post('/adminlogin', (req: Request, res: Response, next: NextFunction) => adminLogin(req, res));
 // router.get("/authcheck/:id", (req: Request, res: Response, next: NextFunction) => authCheck(req, res, next));
@@ -59,7 +64,9 @@ router.post('/logout', async (req: Request, res: Response) => {
     //console.log({ web: "web", id: (decoded as JwtPayload).id, token });
 
     const user = await userModel.updateOne({ _id:(decoded as JwtPayload).id }, { $set: { token: "" } });
-    if (user) {
+    console.log((decoded as JwtPayload).id)
+    const verify = await Verify.deleteOne({ user_id: (decoded as JwtPayload).id })
+    if (user && verify) {
       const dbToken = await userModel.findOne({ token });
       if (dbToken == null) {
         res.status(200).send({ message: 'You have been Logged Out' });

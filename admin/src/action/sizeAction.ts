@@ -32,6 +32,24 @@ export const addSize = (input: any, toast: { success: (msg: string) => void, err
         });
     }
 };
+type manageSize = (currentPage: number, limit: number, search: string, setPageCount: (count: number) => void, setPageindex: (index: number) => void) => (dispatch: Dispatch) => Promise<void>;
+export const sizePagination: manageSize = (currentPage, limit, search, setPageCount, setPageindex) => async (dispatch) => {
+    try {
+        dispatch({ type: LIST_SIZE_REQUEST });
+
+        const { data } = await api.get(`/api/v1/sizepagination?page=${currentPage}&limit=${limit}&search=${search}`);
+        
+        dispatch({ type: LIST_SIZE_SUCCESS, payload: data.results });
+        setPageCount(data.results.pageCount);
+        setPageindex(data.results.pageindex);
+    } catch (error: unknown) {
+        const err = error as Error;
+        dispatch({
+            type: LIST_SIZE_FAIL,
+            payload: err.response && err.response.data.message ? err.response.data.message : err.message
+        });
+    }
+};
 
 export const manageSize = () => async (dispatch: Dispatch) => {
     try {
@@ -39,7 +57,7 @@ export const manageSize = () => async (dispatch: Dispatch) => {
 
         const { data } = await api.get("/api/v1/getsize");
         dispatch({ type: LIST_SIZE_SUCCESS, payload: data.size });
-    } catch (error: any) {
+    } catch (error) {
         const err = error as Error;
         dispatch({
             type: LIST_SIZE_FAIL,

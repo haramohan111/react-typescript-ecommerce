@@ -3,7 +3,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { AnyAction } from 'redux';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { activeCategory, addexcelCategory, manageCategory } from '../../../action/categoryAction';
+import { activeCategory, addexcelCategory } from '../../../action/categoryAction';
 import ReactPaginate from 'react-paginate';
 import * as XLSX from 'xlsx';
 import { 
@@ -11,6 +11,7 @@ import {
     CFormInput, CRow, CTable, CTableBody, CTableCaption, 
     CTableDataCell, CTableHead, CTableHeaderCell, CTableRow 
 } from '@coreui/react';
+import { sizePagination } from '../../../action/sizeAction';
 
 interface Category {
     _id: string;
@@ -19,10 +20,10 @@ interface Category {
 }
 
 interface RootState {
-    categoryList: {
+    sizereducer: {
         error: any;
         loading: boolean;
-        category: {
+        sizes: {
             result: Category[]
         }
     }
@@ -30,8 +31,8 @@ interface RootState {
 
 const ManageSize: React.FC = () => {
     const dispatch: ThunkDispatch<RootState, any, AnyAction> = useDispatch();
-    const categoryList = useSelector((state: RootState) => state.categoryList);
-    const { error, loading, category } = categoryList;
+    const categoryList = useSelector((state: RootState) => state.sizereducer);
+    const { error, loading, sizes } = categoryList;
 
     const [limit, setLimit] = useState(5);
     const [pageCount, setPageCount] = useState(1);
@@ -43,17 +44,17 @@ const ManageSize: React.FC = () => {
 
     const handlePageClick = (e: { selected: number }) => {
         currentPage.current = e.selected + 1;
-        dispatch(manageCategory(currentPage.current, limit, search, setPageCount, setPageindex));
+        dispatch(sizePagination(currentPage.current, limit, search, setPageCount, setPageindex));
     }
 
     const changeLimit = () => {
         currentPage.current = 1;
-        dispatch(manageCategory(currentPage.current, limit, search, setPageCount, setPageindex));
+        dispatch(sizePagination(currentPage.current, limit, search, setPageCount, setPageindex));
     }
 
     const handleKeyPress = (e: ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value);
-        dispatch(manageCategory(currentPage.current, limit, search, setPageCount, setPageindex));
+        dispatch(sizePagination(currentPage.current, limit, search, setPageCount, setPageindex));
     }
 
     const handleChange = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>, id: string) => {
@@ -82,9 +83,9 @@ const ManageSize: React.FC = () => {
     useEffect(() => {
         currentPage.current = 1;
         if (isSubmitted) {
-            dispatch(manageCategory(currentPage.current, limit, search, setPageCount, setPageindex));
+            dispatch(sizePagination(currentPage.current, limit, search, setPageCount, setPageindex));
         }
-        dispatch(manageCategory(currentPage.current, limit, search, setPageCount, setPageindex));
+        dispatch(sizePagination(currentPage.current, limit, search, setPageCount, setPageindex));
         dispatch(addexcelCategory(exceldata, toast));
     }, [dispatch, search, exceldata, isSubmitted, limit, setPageCount, setPageindex]);
 
@@ -100,7 +101,7 @@ const ManageSize: React.FC = () => {
                             <CTableHead>
                                 <CTableRow>
                                     <CTableHeaderCell scope="col">#</CTableHeaderCell>
-                                    <CTableHeaderCell scope="col">Category</CTableHeaderCell>
+                                    <CTableHeaderCell scope="col">Size</CTableHeaderCell>
                                     <CTableHeaderCell scope="col">Status</CTableHeaderCell>
                                     <CTableHeaderCell scope="col">Action</CTableHeaderCell>
                                     <CTableHeaderCell scope="col">
@@ -113,7 +114,7 @@ const ManageSize: React.FC = () => {
                                 </CTableRow>
                             </CTableHead>
                             <CTableBody>
-                                {category?.result?.map((cat, index) => (
+                                {sizes?.result?.map((cat, index) => (
                                     <CTableRow key={index}>
                                         <CTableHeaderCell scope="row">{pageindex + index + 1}</CTableHeaderCell>
                                         <CTableDataCell>{cat.name}</CTableDataCell>

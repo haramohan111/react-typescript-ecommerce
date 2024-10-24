@@ -7,7 +7,7 @@ import AddListSubcategory from './views/pages/listsubcategory/category/AddListSu
 import ManageListSubcategory from './views/pages/listsubcategory/category/ManageListSubcategory'
 import ManageOrder from './views/pages/order/manageOrder'
 import AddSize from './views/pages/size/AddSize'
-import ManageSize from './views/pages/brand/ManageBrand'
+import ManageSize from './views/pages/size/ManageSize'
 import AddBrand from './views/pages/brand/AddBrand'
 import ManageBrand from './views/pages/brand/ManageBrand'
 import AddColor from './views/pages/color/AddColor'

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, ChangeEvent, FormEvent } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { activeCategory, manageCategory, deleteCategory, deleteAllCategory } from '../../../action/categoryAction'
+import { activeCategory, deleteCategory, deleteAllCategory } from '../../../action/categoryAction'
 
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -18,6 +18,7 @@ import {
 } from '@coreui/react'
 import { ThunkDispatch } from 'redux-thunk'
 import { AnyAction } from 'redux'
+import { addSize,sizePagination } from '../../../action/sizeAction'
 
 interface Category {
   _id: string;
@@ -30,7 +31,7 @@ interface RootState {
   sizereducer: {
     error: any;
     loading: boolean;
-    category: {
+    sizes: {
       result: Category[]
     }
   }
@@ -48,7 +49,7 @@ const AddSize: React.FC = () => {
   const dispatch: ThunkDispatch<RootState, any, AnyAction> = useDispatch()
 
   const categoryList = useSelector((state: RootState) => state.sizereducer)
-  const { error, loading, category } = categoryList
+  const { error, loading, sizes } = categoryList
 
   const [limit, setLimit] = useState(3)
   const [pageCount, setPageCount] = useState(1)
@@ -60,12 +61,12 @@ const AddSize: React.FC = () => {
   const handlePageClick = (e: { selected: number }) => {
     currentPage.current = e.selected + 1
     setCurrentPageNum(currentPage.current)
-    dispatch(manageCategory(currentPage.current, limit, search, setPageCount, setPageindex))
+    dispatch(sizePagination(currentPage.current, limit, search, setPageCount, setPageindex))
   }
 
   const handleKeyPress = (e: ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value)
-    dispatch(manageCategory(currentPage.current, limit, search, setPageCount, setPageindex))
+    dispatch(sizePagination(currentPage.current, limit, search, setPageCount, setPageindex))
     setIsSubmitted(true)
   }
 
@@ -84,7 +85,7 @@ const AddSize: React.FC = () => {
 
   const handlealldelete = async () => {
     const checkedinputvalue = categoryData.filter(user => user.isChecked).map(user => user._id)
-    if (category?.result?.length === 1) {
+    if (sizes?.result?.length === 1) {
       const pageBack = currentPage.current - 1
       setCurrentPageNum(pageBack)
       setIsSubmitted(true)
@@ -105,7 +106,7 @@ const AddSize: React.FC = () => {
     e.preventDefault()
     const data = { id }
     dispatch(deleteCategory(data, toast))
-    if (category?.result?.length === 1) {
+    if (sizes?.result?.length === 1) {
       const pageBack = currentPage.current - 1
       setCurrentPageNum(pageBack)
       setIsSubmitted(true)
@@ -117,24 +118,24 @@ const AddSize: React.FC = () => {
     e.preventDefault()
     const data = { name: inputName, status: inputStatus }
     console.log(data)
-    // dispatch(addCategory(data, toast))
-    // setIsSubmitted(true)
-    // setInputName('')
-    // setInputStatus('')
+    dispatch(addSize(data, toast))
+    setIsSubmitted(true)
+    setInputName('')
+    setInputStatus('')
   }
 
   useEffect(() => {
     if (isSubmitted) {
-      dispatch(manageCategory(currentPageNum, limit, search, setPageCount, setPageindex))
+      dispatch(sizePagination(currentPageNum, limit, search, setPageCount, setPageindex))
     }
-    dispatch(manageCategory(currentPageNum, limit, search, setPageCount, setPageindex))
+    dispatch(sizePagination(currentPageNum, limit, search, setPageCount, setPageindex))
     setIsSubmitted(false)
-    setCategoryData(category?.result || [])
-  }, [dispatch, search, isSubmitted, currentPageNum, limit, setPageCount, setPageindex, category])
+    setCategoryData(sizes?.result || [])
+  }, [dispatch, search, isSubmitted, currentPageNum, limit, setPageCount, setPageindex])
 
   useEffect(() => {
     if (categoryList) {
-      setCategoryData(category?.result || [])
+      setCategoryData(sizes?.result || [])
     }
   }, [categoryList])
 
