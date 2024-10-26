@@ -21,7 +21,7 @@ interface IProduct {
 
 interface ICart {
     _id: string;
-    product_id: number;
+    product_id: string;
     quantity: number;
     price: number;
     cart_session_id?: string;
@@ -42,40 +42,37 @@ declare module 'express-session' {
 
   export const addtocart = AsyncHandler(async (req: Request, res: Response): Promise<void> => {
 
-    let id:string;
-
-    if(req.session.cart_session_id){
-      id = req.session.cart_session_id
-    }else{
-        let sid:string = "id" + Math.random().toString(16).slice(2)
-        req.session.cart_session_id = sid
+    if (req.session.cart_session_id === undefined) {
+        req.session.cart_session_id = "id" + Math.random().toString(16).slice(2);
     }
-    // console.log(req.session)
-    // console.log(req.session.cart_session_id)
-    const pid:number = parseInt(req.params.id);
+
+    const cartSessionId = req.session.cart_session_id;
+
+    const pid:string =req.params.id;
     const qty:number = parseInt(req.params.qty);
     const products = await productModel.findOne({ _id: pid }) as IProduct;
     //res.json(products.price)
     const prod_id = await cartModel.findOne({ product_id: pid }) as ICart;
 
-
+    console.log(prod_id)
     if (prod_id) {
         const quan = Number(prod_id.quantity) + Number(qty);
         const price = Number(products.price) * Number(quan);
-        const cartupdate = await cartModel.findByIdAndUpdate(prod_id, { quantity: quan, price }) as ICart | null;
+        await cartModel.findByIdAndUpdate(prod_id, { quantity: quan, price }) as ICart | null;
 
     } else {
-        let id;
         let newprice:number = products.price * qty;
         const cartItemData: Partial<ICart> = {
             product_id: pid,
             quantity: qty,
             price: newprice,
         }
-        if(typeof req.session.userid == undefined){
-            const cartinsert = await cartModel.create({...cartItemData,cart_session_id:id})  ;
+        if(req.session.userid == undefined){
+     
+            await cartModel.create({...cartItemData,cart_session_id:cartSessionId})  ;
         }else{
-            const cartinsert = await cartModel.create(cartItemData) ;
+    
+             await cartModel.create({...cartItemData,cart_session_id:""}) ;
         }
     }
     const cart = await cartModel.find({}).populate({ path: 'product_id' });

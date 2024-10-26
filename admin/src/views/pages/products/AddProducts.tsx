@@ -264,7 +264,7 @@ const AddProducts: React.FC = () => {
             >
               <option>Select</option>
               {
-                brands?.map((bran, index) => (
+                brands.length>0 && brands?.map((bran, index) => (
                   <option key={index}>{bran.name}</option>
                 ))
               }
@@ -278,7 +278,7 @@ const AddProducts: React.FC = () => {
             >
               <option>Select</option>
               {
-                colors?.map((bran, index) => (
+                colors.length>0 && colors?.map((bran, index) => (
                   <option key={index}>{bran.name}</option>
                 ))
               }
@@ -292,7 +292,7 @@ const AddProducts: React.FC = () => {
             >
               <option>Select</option>
               {
-                sizes?.map((bran, index) => (
+               sizes.length>0 && sizes?.map((bran, index) => (
                   <option key={index}>{bran.name}</option>
                 ))
               }
@@ -308,7 +308,7 @@ const AddProducts: React.FC = () => {
             >
               <option>Select</option>
               {
-                sellers?.map((bran, index) => (
+                sellers.length>0 && sellers?.map((bran, index) => (
                   <option key={index}>{bran.name}</option>
                 ))
               }

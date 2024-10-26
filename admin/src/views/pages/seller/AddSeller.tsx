@@ -1,6 +1,6 @@
 import React, { ChangeEvent, FormEvent, useEffect,useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { activeCategory, addCategory,deleteCategory,deleteAllCategory  } from '../../../action/categoryAction';
+import { activeSeler, addSeler,deleteSeler,deleteAllSeler  } from '../../../action/sellerAction';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ReactPaginate from 'react-paginate';
@@ -39,7 +39,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { AnyAction } from 'redux';
 import { selerPagination } from '../../../action/sellerAction';
 
-interface Category {
+interface seler {
   _id: string;
   name: string;
   status: number;
@@ -47,16 +47,16 @@ interface Category {
 }
 
 interface RootState {
-  categoryList: {
+  sellerreducer: {
     error: string;
     loading: boolean;
-    sellers: { result: Category[] };
+    sellers: { result: seler[] };
   };
 }
 
 const AddSeller: React.FC = () => {
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
-  const [categoryData, setCategoryData] = useState<Category[]>([]);
+  const [selerData, setselerData] = useState<seler[]>([]);
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [validated, setValidated] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -64,8 +64,8 @@ const AddSeller: React.FC = () => {
   const [inputStatus, setInputStatus] = useState('');
   const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
   
-  const categoryList = useSelector((state: RootState) => state.categoryList);
-  const { error, loading, sellers } = categoryList;
+  const selerList = useSelector((state: RootState) => state.sellerreducer);
+  const { error, loading, sellers } = selerList;
   const [limit, setLimit] = useState<number>(3);
   const [pageCount, setPageCount] = useState<number>(1);
   const currentPage = useRef<number>(1);
@@ -90,22 +90,22 @@ const AddSeller: React.FC = () => {
   const handleSelectAllChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     if (name === 'selectAll') {
-      const checkedvalues = categoryData.map(user => ({ ...user, isChecked: checked }));
-      setCategoryData(checkedvalues);
+      const checkedvalues = selerData.map(user => ({ ...user, isChecked: checked }));
+      setselerData(checkedvalues);
     } else {
-      const checkedvalue = categoryData.map(user => user.name === name ? { ...user, isChecked: checked } : user);
-      setCategoryData(checkedvalue);
+      const checkedvalue = selerData.map(user => user.name === name ? { ...user, isChecked: checked } : user);
+      setselerData(checkedvalue);
     }
   };
 
   const handlealldelete = async () => {
-    const checkedinputvalue = categoryData.filter(user => user.isChecked).map(user => user._id);
+    const checkedinputvalue = selerData.filter(user => user.isChecked).map(user => user._id);
     if (sellers?.result?.length === 1) {
       const pageBack = currentPage.current - 1;
       setCurrentPageNum(pageBack);
       setIsSubmitted(true);
     }
-    dispatch(deleteAllCategory(checkedinputvalue, toast));
+    dispatch(deleteAllSeler(checkedinputvalue, toast));
     setIsSubmitted(true);
   };
 
@@ -113,14 +113,14 @@ const AddSeller: React.FC = () => {
     const target = e.target as HTMLButtonElement;
     const act = target.value === "Active" ? 0 : 1;
     const data = { id, status: act };
-    dispatch(activeCategory(data, toast));
+    dispatch(activeSeler(data, toast));
     setIsSubmitted(true);
   };
 
   const handleChangeDelete = (e: FormEvent<HTMLButtonElement | HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     const data = { id };
-    dispatch(deleteCategory(data, toast));
+    dispatch(deleteSeler(data, toast));
     if (sellers?.result?.length === 1) {
       const pageBack = currentPage.current - 1;
       setCurrentPageNum(pageBack);
@@ -132,7 +132,7 @@ const AddSeller: React.FC = () => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = { name: inputName, status: inputStatus };
-    dispatch(addCategory(data, toast));
+    dispatch(addSeler(data, toast));
     setIsSubmitted(true);
     setInputName('');
     setInputStatus('');
@@ -144,14 +144,14 @@ const AddSeller: React.FC = () => {
       setIsSubmitted(false);
     }
     dispatch(selerPagination(currentPageNum, limit, search, setPageCount, setPageindex));
-    setCategoryData(sellers?.result || []);
-  }, [dispatch, search, isSubmitted, currentPageNum, limit, sellers?.result]);
+    setselerData(sellers?.result || []);
+  }, [dispatch, search, isSubmitted, currentPageNum, limit]);
 
   useEffect(() => {
-    if (categoryList) {
-      setCategoryData(sellers?.result || []);
+    if (selerList) {
+      setselerData(sellers?.result || []);
     }
-  }, [categoryList]);
+  }, [selerList]);
     return (<>
         <ToastContainer/>
         <CForm
@@ -164,8 +164,8 @@ const AddSeller: React.FC = () => {
             <CCol xs={12}>
                 <CRow>
                     <CCol md={3}>
-                        <CFormLabel htmlFor="validationCustom01">Category</CFormLabel>
-                        <CFormInput type="text" id="validationCustom01"  name="categoryname" value={inputName || ''} onChange={(e) => setInputName(e.target.value)}  defaultValue="" placeholder='Enter Category' required />
+                        <CFormLabel htmlFor="validationCustom01">seler</CFormLabel>
+                        <CFormInput type="text" id="validationCustom01"  name="selername" value={inputName || ''} onChange={(e) => setInputName(e.target.value)}  defaultValue="" placeholder='Enter seler' required />
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                     </CCol>
                 </CRow>
@@ -214,11 +214,11 @@ const AddSeller: React.FC = () => {
         <input
         type="checkbox"
         name="selectAll"
-        checked={!categoryData?.some((user)=>user?.isChecked!==true)}
+        checked={!selerData?.some((user)=>user?.isChecked!==true)}
         onChange={handleSelectAllChange}
       /></CTableHeaderCell>
                   <CTableHeaderCell scope="col">#</CTableHeaderCell>
-                  <CTableHeaderCell scope="col">Category</CTableHeaderCell>
+                  <CTableHeaderCell scope="col">seler</CTableHeaderCell>
                   <CTableHeaderCell scope="col">Status</CTableHeaderCell>
                   <CTableHeaderCell scope="col">Action</CTableHeaderCell>
                 </CTableRow>
@@ -226,7 +226,7 @@ const AddSeller: React.FC = () => {
               <CTableBody>
 
                 { 
-                 categoryData?.map((cat, index) => (
+                 selerData?.map((cat, index) => (
                     <CTableRow key={index}>
                      <CTableDataCell > <div key={cat.name}>          
            <input
@@ -247,7 +247,7 @@ const AddSeller: React.FC = () => {
                       </CTableDataCell>
                       <CTableDataCell>
                         
-                        <CNavLink to={`/category/editcategory/${cat?._id}`} color="primary" component={NavLink}>
+                        <CNavLink to={`/seler/editseler/${cat?._id}`} color="primary" component={NavLink}>
                         <CButton component="input" type="button" color="primary" value="Edit" />
                         </CNavLink>
                         <CButton component="input" type="button" color="danger" value="Delete" onClick={(e) => handleChangeDelete(e,cat._id)} />

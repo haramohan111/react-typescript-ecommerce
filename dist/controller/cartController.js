@@ -18,39 +18,33 @@ const cartModel_1 = __importDefault(require("../models/cartModel"));
 const productModel_1 = __importDefault(require("../models/productModel"));
 const couponModel_1 = __importDefault(require("../models/couponModel"));
 exports.addtocart = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let id;
-    if (req.session.cart_session_id) {
-        id = req.session.cart_session_id;
+    if (req.session.cart_session_id === undefined) {
+        req.session.cart_session_id = "id" + Math.random().toString(16).slice(2);
     }
-    else {
-        let sid = "id" + Math.random().toString(16).slice(2);
-        req.session.cart_session_id = sid;
-    }
-    // console.log(req.session)
-    // console.log(req.session.cart_session_id)
-    const pid = parseInt(req.params.id);
+    const cartSessionId = req.session.cart_session_id;
+    const pid = req.params.id;
     const qty = parseInt(req.params.qty);
     const products = yield productModel_1.default.findOne({ _id: pid });
     //res.json(products.price)
     const prod_id = yield cartModel_1.default.findOne({ product_id: pid });
+    console.log(prod_id);
     if (prod_id) {
         const quan = Number(prod_id.quantity) + Number(qty);
         const price = Number(products.price) * Number(quan);
-        const cartupdate = yield cartModel_1.default.findByIdAndUpdate(prod_id, { quantity: quan, price });
+        yield cartModel_1.default.findByIdAndUpdate(prod_id, { quantity: quan, price });
     }
     else {
-        let id;
         let newprice = products.price * qty;
         const cartItemData = {
             product_id: pid,
             quantity: qty,
             price: newprice,
         };
-        if (typeof req.session.userid == undefined) {
-            const cartinsert = yield cartModel_1.default.create(Object.assign(Object.assign({}, cartItemData), { cart_session_id: id }));
+        if (req.session.userid == undefined) {
+            yield cartModel_1.default.create(Object.assign(Object.assign({}, cartItemData), { cart_session_id: cartSessionId }));
         }
         else {
-            const cartinsert = yield cartModel_1.default.create(cartItemData);
+            yield cartModel_1.default.create(Object.assign(Object.assign({}, cartItemData), { cart_session_id: "" }));
         }
     }
     const cart = yield cartModel_1.default.find({}).populate({ path: 'product_id' });

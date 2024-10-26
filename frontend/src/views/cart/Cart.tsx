@@ -1,7 +1,7 @@
 import React, { useState, lazy, useEffect } from "react";
 import { ThunkDispatch } from 'redux-thunk';
 import { AnyAction } from 'redux';
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as IconHeartFill } from "bootstrap-icons/icons/heart-fill.svg";
@@ -49,7 +49,7 @@ interface RootState{
 }
 
 interface UserState{
-  loginInfo :[],
+  loginInfo :string[],
   register: [], // Initialize register
   authcheck: [], // Initialize authcheck
 }
@@ -65,7 +65,8 @@ const CartView = () => {
   console.log( cartItems)
   const userList = useSelector((state:userRootreducer)=>state.userreducer)
   const {loginInfo} = userList
-
+  console.log(loginInfo)
+  const navigate = useNavigate()
   const increaseqty = (ids: string) =>{
     dispatch(increaseQty(ids))
   }
@@ -121,6 +122,15 @@ const CartView = () => {
       console.log(e)
     }
   }
+  const handleCheckout =(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>): void =>{
+  event.preventDefault();
+
+  const loginInfo: string[] = [];
+  if(loginInfo.length===0){
+    navigate("/account/signin")
+  }
+  }
+
   return (
     <React.Fragment>
        <ToastContainer/>
@@ -221,7 +231,7 @@ const CartView = () => {
                 </table>
               </div>
               <div className="card-footer">
-                <Link to="/checkout" className="btn btn-primary float-end">
+                <Link to="#" onClick={handleCheckout} className="btn btn-primary float-end">
                   Make Purchase <IconChevronRight className="i-va" />
                 </Link>
                 <Link to="/" className="btn btn-secondary">

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useState, useContext, createContext, useEffect, ReactNode } from 'react';
+import api from '../utils/api';
 
 // Define the type for the cart items
 interface CartItem {
@@ -25,7 +26,7 @@ const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cartc, setCartc] = useState<CartItem[]>([]);
 
   useEffect(() => {
-    axios.get("http://localhost:9000/api/v1/cart")
+    api.get("api/v1/cart")
       .then((response) => {
         setCartc([...cartc, response.data]);
       })

@@ -28,7 +28,6 @@ const CheckoutView = () => {
   const [country, setCountry] = useState<string>('');
   const [state, setState] = useState<string>('');
   const [zip, setZip] = useState<string>('');
-  const [auth, setAuth] = useAuth()
   const [inputValue, setInputValue] = useState<string>('');
   const isDefault = true;
   const navigate = useNavigate()
@@ -74,6 +73,7 @@ const CheckoutView = () => {
   //   console.log(auth)
   useEffect(() => {
     if (loginInfo == null) {
+
       navigate("/account/signin")
     }
     dispatch(CartList())

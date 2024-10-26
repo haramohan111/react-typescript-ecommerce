@@ -12,7 +12,8 @@ import {
 } from '../controller/sizeController';
 import {
   addSeller,
-  getSeller
+  getSeller,
+  selerPagination
 } from '../controller/sellerController';
 import {
   adminLogin
@@ -40,8 +41,8 @@ router.post('/addsize', (req: Request, res: Response, next: NextFunction) => add
 router.get('/sizepagination', (req: Request, res: Response, next: NextFunction) => sizePagination(req, res, next));
 router.get('/getsize', (req: Request, res: Response, next: NextFunction) => getSize(req, res, next));
 
-router.post('/addseller', (req: Request, res: Response, next: NextFunction) => addSeller(req, res, next));
-router.get('/sellerpagination', (req: Request, res: Response, next: NextFunction) => brandPagination(req, res, next));
+router.post('/addseler', (req: Request, res: Response, next: NextFunction) => addSeller(req, res, next));
+router.get('/sellerpagination', (req: Request, res: Response, next: NextFunction) => selerPagination(req, res, next));
 router.get('/getseller', (req: Request, res: Response, next: NextFunction) => getSeller(req, res, next));
 
 router.post('/adminlogin', (req: Request, res: Response, next: NextFunction) => adminLogin(req, res));

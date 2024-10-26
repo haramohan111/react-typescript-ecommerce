@@ -1,4 +1,4 @@
-import { LIST_SELER_FAIL, LIST_SELER_REQUEST, LIST_SELER_SUCCESS } from "../constants/sellerConstants";
+import { ADD_SELLER_FAIL, ADD_SELLER_REQUEST, ADD_SELLER_SUCCESS, LIST_SELER_FAIL, LIST_SELER_REQUEST, LIST_SELER_SUCCESS } from "../constants/sellerConstants";
 
 interface Seller {
     id: string;
@@ -30,6 +30,12 @@ export const sellerReducer = (state: SellerState = initialSellerState, action: A
             return { loading: false, sellers: action.payload };
         case LIST_SELER_FAIL:
             return { loading: false, error: action.payload, sellers: [] };
+            case ADD_SELLER_REQUEST:
+                return { loading: true, sellers: [] };
+            case ADD_SELLER_SUCCESS:
+                return { loading: false, sellers: action.payload };
+            case ADD_SELLER_FAIL:
+                return { loading: false, error: action.payload, sellers: [] };
         default:
             return state;
     }

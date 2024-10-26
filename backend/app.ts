@@ -5,6 +5,8 @@ import moment from 'moment-timezone';
 import colors from 'colors';
 import cors from "cors";
 import dotenv from "dotenv";
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
 import connectDB from "./config/db";
 dotenv.config()
 
@@ -22,9 +24,17 @@ app.use(cors({
 const indiaTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
 console.log(`Current date and time in India: ${indiaTime}`);
 
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-app.use(errorHandler)
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(errorHandler);
+
+app.use(session({
+  secret: 'your_secret_key', // Change this to a strong secret
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: 'mongodb://localhost:27017/react-typescript-ecommerce' }), // Store sessions in MongoDB
+  cookie: { secure: false }, // Set to true if using https
+}));
 
 // Middleware to conditionally apply protect middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -32,7 +42,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   const openRoutes = ['/api/v1/adminlogin', '/api/v1/managefrontcategory', 
     '/api/v1/cart', '/api/v1/products', '/api/v1/logout', '/api/v1/refresh', 
     '/api/v1/verify','/api/v1/userlogin','/api/v1/userrefresh','/api/v1/signup'];
-  if (openRoutes.includes(req.path)) {
+    const dynamicOpenRoutes = /^\/api\/v1\/addtocart\/[^/]+\/[^/]+$/;
+  if (openRoutes.includes(req.path) || dynamicOpenRoutes.test(req.path)) {
     console.log('Open route accessed:', req.path);
     return next();
   }

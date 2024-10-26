@@ -96,11 +96,11 @@ const productSchema: Schema = new Schema({
   reviews: [reviewSchema],
   rating: {
     type: Number,
-    required: true
+
   },
   numReviews: {
     type: Number,
-    required: true
+  
   },
   price: {
     type: Number,

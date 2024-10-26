@@ -9,6 +9,8 @@ const authMiddleware_1 = require("./middleware/authMiddleware");
 const moment_timezone_1 = __importDefault(require("moment-timezone"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const express_session_1 = __importDefault(require("express-session"));
+const connect_mongo_1 = __importDefault(require("connect-mongo"));
 const db_1 = __importDefault(require("./config/db"));
 dotenv_1.default.config();
 (0, db_1.default)();
@@ -24,13 +26,21 @@ console.log(`Current date and time in India: ${indiaTime}`);
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use(errorMiddleware_1.errorHandler);
+app.use((0, express_session_1.default)({
+    secret: 'your_secret_key', // Change this to a strong secret
+    resave: false,
+    saveUninitialized: false,
+    store: connect_mongo_1.default.create({ mongoUrl: 'mongodb://localhost:27017/react-typescript-ecommerce' }), // Store sessions in MongoDB
+    cookie: { secure: false }, // Set to true if using https
+}));
 // Middleware to conditionally apply protect middleware
 app.use((req, res, next) => {
     console.log(req.path);
     const openRoutes = ['/api/v1/adminlogin', '/api/v1/managefrontcategory',
         '/api/v1/cart', '/api/v1/products', '/api/v1/logout', '/api/v1/refresh',
         '/api/v1/verify', '/api/v1/userlogin', '/api/v1/userrefresh', '/api/v1/signup'];
-    if (openRoutes.includes(req.path)) {
+    const dynamicOpenRoutes = /^\/api\/v1\/addtocart\/[^/]+\/[^/]+$/;
+    if (openRoutes.includes(req.path) || dynamicOpenRoutes.test(req.path)) {
         console.log('Open route accessed:', req.path);
         return next();
     }
