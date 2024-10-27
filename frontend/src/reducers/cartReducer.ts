@@ -24,11 +24,11 @@ import {
   export const cartReducer = (state: CartState = { cart: [], cartItems: [] }, action: CartAction): CartState => {
     switch (action.type) {
       case ADDTO_CART_REQUEST:
-        return { loading: true, cart: [], cartItems: state.cartItems };
+        return { ...state,loading: true, cart: [], cartItems: state.cartItems };
       case ADDTO_CART_SUCCESS:
-        return { loading: false, cart: action.payload, cartItems: state.cartItems };
+        return { ...state,loading: false, cart: action.payload, cartItems: state.cartItems };
       case ADDTO_CART_FAIL:
-        return { loading: false, error: action.payload, cart: state.cart, cartItems: state.cartItems };
+        return { ...state,loading: false, error: action.payload, cart: state.cart, cartItems: state.cartItems };
       case CART_ADD_ITEM_BEFORE_LOGIN:
         const item = action.payload;
         const existItem = state.cartItems.find((x) => x.product === item.product);
@@ -49,35 +49,35 @@ import {
           cartItems: state.cartItems.filter((x) => x.product !== action.payload) 
         };
       case CART_LIST_REQUEST:
-        return { loading: true, cart: [], cartItems: state.cartItems };
+        return { ...state,loading: true, cart: [], cartItems: state.cartItems };
       case CART_LIST_SUCCESS:
-        return { loading: false, cart: action.payload, cartItems: state.cartItems };
+        return { ...state,loading: false, cart: action.payload, cartItems: state.cartItems };
       case CART_LIST_FAIL:
-        return { loading: false, error: action.payload, cart: state.cart, cartItems: state.cartItems };
+        return { ...state,loading: false, error: action.payload, cart: state.cart, cartItems: state.cartItems };
       case INCQTY_REQUEST:
-        return { loading: true, cart: [], cartItems: state.cartItems };
+        return { ...state,loading: true, cart: [], cartItems: state.cartItems };
       case INCQTY_SUCCESS:
-        return { loading: false, cart: action.payload, cartItems: state.cartItems };
+        return { ...state,loading: false, cart: action.payload, cartItems: state.cartItems };
       case INCQTY_FAIL:
-        return { loading: false, error: action.payload, cart: state.cart, cartItems: state.cartItems };
+        return { ...state,loading: false, error: action.payload, cart: state.cart, cartItems: state.cartItems };
       case DECQTY_REQUEST:
-        return { loading: true, cart: [], cartItems: state.cartItems };
+        return { ...state,loading: true, cart: [], cartItems: state.cartItems };
       case DECQTY_SUCCESS:
-        return { loading: false, cart: action.payload, cartItems: state.cartItems };
+        return { ...state,loading: false, cart: action.payload, cartItems: state.cartItems };
       case DECQTY_FAIL:
-        return { loading: false, error: action.payload, cart: state.cart, cartItems: state.cartItems };
+        return { ...state,loading: false, error: action.payload, cart: state.cart, cartItems: state.cartItems };
       case REMOVE_CART_REQUEST:
-        return { loading: true, cart: [], cartItems: state.cartItems };
+        return { ...state,loading: true, cart: [], cartItems: state.cartItems };
       case REMOVE_CART_SUCCESS:
-        return { loading: false, cart: action.payload, cartItems: state.cartItems };
+        return { ...state,loading: false, cart: action.payload, cartItems: state.cartItems };
       case REMOVE_CART_FAIL:
-        return { loading: false, error: action.payload, cart: state.cart, cartItems: state.cartItems };
+        return { ...state,loading: false, error: action.payload, cart: state.cart, cartItems: state.cartItems };
       case COUPON_REQUEST:
-        return { loading: true, cart: [], cartItems: state.cartItems };
+        return { ...state,loading: true, cart: [], cartItems: state.cartItems };
       case COUPON_SUCCESS:
-        return { loading: false, cart: action.payload, cartItems: state.cartItems };
+        return { ...state,loading: false, cart: action.payload, cartItems: state.cartItems };
       case COUPON_FAIL:
-        return { loading: false, error: action.payload, cart: state.cart, cartItems: state.cartItems };
+        return { ...state,loading: false, error: action.payload, cart: state.cart, cartItems: state.cartItems };
       case SAVE_SHIPPING_ADDRESS:
         return { ...state, loading: false, shippingaddress: action.payload };
       default:

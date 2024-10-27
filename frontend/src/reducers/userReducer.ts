@@ -25,27 +25,28 @@ import {
   }
   
   export const userReducer = (state: UserState = { register: [], loginInfo: [], authcheck: [] }, action: UserAction): UserState => {
+    console.log(action)
     switch (action.type) {
       case ADD_SIGNUP_REQUEST:
-        return { loading: true, register: [], loginInfo: state.loginInfo, authcheck: state.authcheck };
+        return { ...state,loading: true, register: [], loginInfo: state.loginInfo, authcheck: state.authcheck };
       case ADD_SIGNUP_SUCCESS:
-        return { loading: false, register: action.payload, loginInfo: state.loginInfo, authcheck: state.authcheck };
+        return { ...state,loading: false, register: action.payload, loginInfo: state.loginInfo, authcheck: state.authcheck };
       case ADD_SIGNUP_FAIL:
-        return { loading: false, error: action.payload, register: [], loginInfo: state.loginInfo, authcheck: state.authcheck };
+        return { ...state,loading: false, error: action.payload, register: [], loginInfo: state.loginInfo, authcheck: state.authcheck };
       case LOGIN_REQUEST:
-        return { loading: true, register: state.register, loginInfo: [], authcheck: state.authcheck };
+        return { ...state,loading: true, register: state.register, loginInfo: [], authcheck: state.authcheck };
       case LOGIN_SUCCESS:
-        return { loading: false, register: state.register, loginInfo: action.payload, authcheck: state.authcheck };
+        return { ...state,loading: false, register: state.register, loginInfo: action.payload, authcheck: state.authcheck };
       case LOGIN_FAIL:
-        return { loading: false, error: action.payload, register: state.register, loginInfo: [], authcheck: state.authcheck };
+        return { ...state,loading: false, error: action.payload, register: state.register, loginInfo: [], authcheck: state.authcheck };
         case USER_LOGOUT:
         return { ...state,loading: false, loginInfo: [] };
       case AUTH_CHECK_REQUEST:
-        return { loading: true, register: state.register, loginInfo: state.loginInfo, authcheck: [] };
+        return { ...state,loading: true, register: state.register, loginInfo: state.loginInfo, authcheck: [] };
       case AUTH_CHECK_SUCCESS:
-        return { loading: false, register: state.register, loginInfo: state.loginInfo, authcheck: action.payload };
+        return { ...state,loading: false, register: state.register, loginInfo: state.loginInfo, authcheck: action.payload };
       case AUTH_CHECK_FAIL:
-        return { loading: false, error: action.payload, register: state.register, loginInfo: state.loginInfo, authcheck: [] };
+        return { ...state,loading: false, error: action.payload, register: state.register, loginInfo: state.loginInfo, authcheck: [] };
       default:
         return state;
     }

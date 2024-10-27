@@ -21,17 +21,17 @@ import {
   export const productReducer = (state: ProductState = { products: [] }, action: ProductAction): ProductState => {
     switch (action.type) {
       case PRODUCT_LIST_REQUEST:
-        return { loading: true, products: [] };
+        return { ...state,loading: true, products: [] };
       case PRODUCT_LIST_SUCCESS:
-        return { loading: false, products: action.payload };
+        return { ...state,loading: false, products: action.payload };
       case PRODUCT_LIST_FAILS:
-        return { loading: false, error: action.payload, products: [] };
+        return { ...state,loading: false, error: action.payload, products: [] };
       case PRODUCTBYID_REQUEST:
-        return { loading: true, products: [] };
+        return { ...state,loading: true, products: [] };
       case PRODUCTBYID_SUCCESS:
-        return { loading: false, products: action.payload };
+        return { ...state,loading: false, products: action.payload };
       case PRODUCTBYID_FAILS:
-        return { loading: false, error: action.payload, products: [] };
+        return { ...state,loading: false, error: action.payload, products: [] };
       default:
         return state;
     }

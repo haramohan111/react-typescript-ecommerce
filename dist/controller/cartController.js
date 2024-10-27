@@ -18,62 +18,87 @@ const cartModel_1 = __importDefault(require("../models/cartModel"));
 const productModel_1 = __importDefault(require("../models/productModel"));
 const couponModel_1 = __importDefault(require("../models/couponModel"));
 exports.addtocart = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (req.session.cart_session_id === undefined) {
-        req.session.cart_session_id = "id" + Math.random().toString(16).slice(2);
-    }
-    const cartSessionId = req.session.cart_session_id;
     const pid = req.params.id;
     const qty = parseInt(req.params.qty);
-    const products = yield productModel_1.default.findOne({ _id: pid });
-    //res.json(products.price)
-    const prod_id = yield cartModel_1.default.findOne({ product_id: pid });
-    console.log(prod_id);
-    if (prod_id) {
-        const quan = Number(prod_id.quantity) + Number(qty);
-        const price = Number(products.price) * Number(quan);
-        yield cartModel_1.default.findByIdAndUpdate(prod_id, { quantity: quan, price });
+    if (!pid || isNaN(qty) || qty <= 0) {
+        res.status(400).json({ message: 'Invalid product ID or quantity.' });
+        return;
+    }
+    const product = yield productModel_1.default.findById(pid).exec();
+    if (!product) {
+        res.status(404).json({ message: 'Product not found.' });
+        return;
+    }
+    let cart_session_id;
+    const cartSessionId = req.cookies.cart_session_id;
+    if (!cartSessionId) {
+        cart_session_id = "id" + Math.random().toString(16).slice(2);
     }
     else {
-        let newprice = products.price * qty;
+        cart_session_id = cartSessionId;
+    }
+    const existingCartItem = yield cartModel_1.default.findOne({ product_id: pid, cart_session_id: cartSessionId }).exec();
+    if (existingCartItem) {
+        const newQuantity = existingCartItem.quantity + qty;
+        const newPrice = product.price * newQuantity;
+        yield cartModel_1.default.findByIdAndUpdate(existingCartItem._id, { quantity: newQuantity, price: newPrice }).exec();
+    }
+    else {
+        const newPrice = product.price * qty;
         const cartItemData = {
             product_id: pid,
             quantity: qty,
-            price: newprice,
+            price: newPrice,
+            cart_session_id: cart_session_id
         };
-        if (req.session.userid == undefined) {
-            yield cartModel_1.default.create(Object.assign(Object.assign({}, cartItemData), { cart_session_id: cartSessionId }));
-        }
-        else {
-            yield cartModel_1.default.create(Object.assign(Object.assign({}, cartItemData), { cart_session_id: "" }));
-        }
+        yield cartModel_1.default.create(cartItemData);
     }
-    const cart = yield cartModel_1.default.find({}).populate({ path: 'product_id' });
-    req.session.cart_id = cart.map(item => item._id).toString();
-    //req.session.cart_id = cart._id
+    const cart = yield cartModel_1.default.find({}).populate({ path: 'product_id' }).exec();
+    //Set cookie
+    res.cookie('cart_session_id', cart_session_id, {
+        maxAge: 1000 * 60 * 60 * 24 * 5, // 5 days
+        httpOnly: false,
+        secure: false, // Change to true if using HTTPS
+        sameSite: 'lax'
+    });
     res.json(cart);
 }));
 exports.cartList = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let totalprice = yield cartModel_1.default.aggregate([
+    var _a;
+    // Access the cart_session_id cookie
+    const cartSessionId = req.cookies.cart_session_id;
+    if (!cartSessionId) {
+        res.status(400).json({ message: 'No cart session ID found.' });
+        return;
+    }
+    // Calculate the total price based on cart_session_id
+    const totalPrice = yield cartModel_1.default.aggregate([
+        {
+            $match: {
+                cart_session_id: cartSessionId,
+            }
+        },
         {
             $group: {
                 _id: null,
-                total: {
-                    $sum: "$price"
-                }
+                total: { $sum: "$price" }
             }
         }
     ]);
-    const allcart = yield cartModel_1.default.find({})
+    // Fetch all cart items for the given cart_session_id
+    const allCart = yield cartModel_1.default.find({ cart_session_id: cartSessionId })
         .populate({ path: 'product_id' });
-    const data = { allcart, totalprice };
+    // Prepare the response data
+    const data = { allCart, totalPrice: ((_a = totalPrice[0]) === null || _a === void 0 ? void 0 : _a.total) || 0 }; // Handle case where totalPrice might be empty
     res.json(data);
-    // const products = await productModel.find({})
-    //     .populate({ path: 'category_id' })
-    //     .populate({ path: 'subcategory_id' })
-    //     .populate({ path: 'listsubcategory_id' })
-    // res.json(products)
 }));
 exports.incQty = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const cartSessionId = req.cookies.cart_session_id;
+    if (!cartSessionId) {
+        res.status(400).json({ message: 'No cart session ID found.' });
+        return;
+    }
     const cartid = req.params.id;
     const cart = yield cartModel_1.default.findById({ _id: cartid });
     if (!cart) {
@@ -81,7 +106,7 @@ exports.incQty = (0, express_async_handler_1.default)((req, res) => __awaiter(vo
         return;
     }
     const productid = cart.product_id;
-    const product = yield productModel_1.default.findById({ _id: productid });
+    const product = yield productModel_1.default.findById({ _id: productid, cart_session_id: cartSessionId });
     if (!product) {
         res.status(404).json({ success: false, message: "Product not found" });
         return;
@@ -91,7 +116,12 @@ exports.incQty = (0, express_async_handler_1.default)((req, res) => __awaiter(vo
     const cartPrice = cart.price + product.price;
     const cartinc = yield cartModel_1.default.findOneAndUpdate({ _id: cartid }, { quantity: qty, price: cartPrice }, { new: true });
     if (cartinc) {
-        let totalprice = yield cartModel_1.default.aggregate([
+        let totalPrice = yield cartModel_1.default.aggregate([
+            {
+                $match: {
+                    cart_session_id: cartSessionId,
+                }
+            },
             {
                 $group: {
                     _id: null,
@@ -101,13 +131,19 @@ exports.incQty = (0, express_async_handler_1.default)((req, res) => __awaiter(vo
                 }
             }
         ]);
-        const allcart = yield cartModel_1.default.find({})
+        const allCart = yield cartModel_1.default.find({ cart_session_id: cartSessionId })
             .populate({ path: 'product_id' });
-        const data = { allcart, totalprice };
+        const data = { allCart, totalPrice: ((_a = totalPrice[0]) === null || _a === void 0 ? void 0 : _a.total) || 0 };
         res.json(data);
     }
 }));
 exports.descQty = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
+    const cartSessionId = req.cookies.cart_session_id;
+    if (!cartSessionId) {
+        res.status(400).json({ message: 'No cart session ID found.' });
+        return;
+    }
     const cartid = req.params.id;
     const cart = yield cartModel_1.default.findById({ _id: cartid });
     if (!cart) {
@@ -115,19 +151,24 @@ exports.descQty = (0, express_async_handler_1.default)((req, res) => __awaiter(v
         return;
     }
     const productid = cart.product_id;
-    const product = yield productModel_1.default.findById({ _id: productid });
+    const product = yield productModel_1.default.findById({ _id: productid, cart_session_id: cartSessionId });
     if (!product) {
         res.status(404).json({ success: false, message: "Product not found" });
         return;
     }
     //const price = product.price
-    let allcart, data, totalprice;
+    let allCart, data, totalPrice;
     if (cart.quantity > 1) {
         const qty = cart.quantity - Number(1);
         const cartPrice = cart.price - Number(product.price);
         const cartdesc = yield cartModel_1.default.findOneAndUpdate({ _id: cartid }, { quantity: qty, price: cartPrice }, { new: true });
         if (cartdesc) {
-            totalprice = yield cartModel_1.default.aggregate([
+            totalPrice = yield cartModel_1.default.aggregate([
+                {
+                    $match: {
+                        cart_session_id: cartSessionId,
+                    }
+                },
                 {
                     $group: {
                         _id: null,
@@ -137,20 +178,19 @@ exports.descQty = (0, express_async_handler_1.default)((req, res) => __awaiter(v
                     }
                 }
             ]);
-            console.log(cartPrice, "lll");
-            allcart = yield cartModel_1.default.find({})
+            allCart = yield cartModel_1.default.find({ cart_session_id: cartSessionId })
                 .populate({ path: 'product_id' });
-            const data = { allcart, totalprice };
+            const data = { allCart, totalPrice: ((_a = totalPrice[0]) === null || _a === void 0 ? void 0 : _a.total) || 0 };
             res.json(data);
         }
     }
     else {
-        //   const allprice =  await cartModel.aggregate([
-        //     {
-        //         $lookup:{from:'products', localField:'products_id',foreignField:'_id',as:'prod'}
-        //     },
-        // ])
-        totalprice = yield cartModel_1.default.aggregate([
+        totalPrice = yield cartModel_1.default.aggregate([
+            {
+                $match: {
+                    cart_session_id: cartSessionId,
+                }
+            },
             {
                 $group: {
                     _id: null,
@@ -160,14 +200,19 @@ exports.descQty = (0, express_async_handler_1.default)((req, res) => __awaiter(v
                 }
             }
         ]);
-        allcart = yield cartModel_1.default.find({})
+        allCart = yield cartModel_1.default.find({ cart_session_id: cartSessionId })
             .populate({ path: 'product_id' });
-        const data = { allcart, totalprice };
+        const data = { allCart, totalPrice: ((_b = totalPrice[0]) === null || _b === void 0 ? void 0 : _b.total) || 0 };
         res.json(data);
     }
 }));
 exports.deleteCart = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const cartSessionId = req.cookies.cart_session_id;
+        if (!cartSessionId) {
+            res.status(400).json({ message: 'No cart session ID found.' });
+            return;
+        }
         const id = req.params.id;
         const cart = yield cartModel_1.default.deleteOne({ _id: id });
         if (cart) {
@@ -181,8 +226,8 @@ exports.deleteCart = (0, express_async_handler_1.default)((req, res) => __awaite
                     }
                 }
             ]);
-            const allcart = yield cartModel_1.default.find({}).populate({ path: 'product_id' });
-            const data = { allcart, totalprice };
+            const allCart = yield cartModel_1.default.find({ cart_session_id: cartSessionId }).populate({ path: 'product_id' });
+            const data = { allCart, totalprice };
             res.status(200).json(data);
         }
     }

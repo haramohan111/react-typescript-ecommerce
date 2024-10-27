@@ -11,6 +11,7 @@ import { sizeReducer } from './reducers/sizeReducer';
 import { sellerReducer } from './reducers/sellerReducer';
 import { userReducer } from './reducers/userReducer';
 import { orderReducer } from './reducers/orderReducer';
+import { sliderReducer } from './reducers/sliderReducer';
 
 interface InitialState {
   sidebarShow: boolean;
@@ -48,7 +49,8 @@ const reducer = combineReducers({
   sellerreducer: sellerReducer,
   userreducer: userReducer,
   orderreducer: orderReducer,
-  changeState
+  changeState,
+  sliderReducer
 });
 
 const middleware = [thunk];

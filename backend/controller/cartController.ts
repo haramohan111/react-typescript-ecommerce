@@ -34,97 +34,142 @@ interface ICart {
 
 declare module 'express-session' {
     interface SessionData {
-      cart_session_id: string;
-      userid?: string; // If you have this property
-      cart_id?: string; // If you have this property
+        cart_session_id: string;
+        userid?: string; // If you have this property
+        cart_id?: string; // If you have this property
     }
-  }
+}
 
-  export const addtocart = AsyncHandler(async (req: Request, res: Response): Promise<void> => {
 
-    if (req.session.cart_session_id === undefined) {
-        req.session.cart_session_id = "id" + Math.random().toString(16).slice(2);
+
+export const addtocart = AsyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const pid: string = req.params.id;
+    const qty: number = parseInt(req.params.qty);
+
+    if (!pid || isNaN(qty) || qty <= 0) {
+        res.status(400).json({ message: 'Invalid product ID or quantity.' });
+        return;
     }
 
-    const cartSessionId = req.session.cart_session_id;
+    const product = await productModel.findById(pid).exec();
+    if (!product) {
+        res.status(404).json({ message: 'Product not found.' });
+        return;
+    }
 
-    const pid:string =req.params.id;
-    const qty:number = parseInt(req.params.qty);
-    const products = await productModel.findOne({ _id: pid }) as IProduct;
-    //res.json(products.price)
-    const prod_id = await cartModel.findOne({ product_id: pid }) as ICart;
+    let cart_session_id:string;
+    const cartSessionId = req.cookies.cart_session_id;
+    if(!cartSessionId){
+       cart_session_id= "id" + Math.random().toString(16).slice(2)
+    }else{
+        cart_session_id=cartSessionId
+    }
 
-    console.log(prod_id)
-    if (prod_id) {
-        const quan = Number(prod_id.quantity) + Number(qty);
-        const price = Number(products.price) * Number(quan);
-        await cartModel.findByIdAndUpdate(prod_id, { quantity: quan, price }) as ICart | null;
+    const existingCartItem = await cartModel.findOne({ product_id: pid,cart_session_id: cartSessionId }).exec();
 
+
+
+    if (existingCartItem) {
+        const newQuantity = existingCartItem.quantity + qty;
+        const newPrice = product.price * newQuantity;
+        await cartModel.findByIdAndUpdate(existingCartItem._id, { quantity: newQuantity, price: newPrice }).exec();
     } else {
-        let newprice:number = products.price * qty;
-        const cartItemData: Partial<ICart> = {
+
+        const newPrice = product.price * qty;
+        const cartItemData = {
             product_id: pid,
             quantity: qty,
-            price: newprice,
-        }
-        if(req.session.userid == undefined){
-     
-            await cartModel.create({...cartItemData,cart_session_id:cartSessionId})  ;
-        }else{
-    
-             await cartModel.create({...cartItemData,cart_session_id:""}) ;
-        }
+            price: newPrice,
+            cart_session_id:cart_session_id
+        };
+        await cartModel.create(cartItemData);
     }
-    const cart = await cartModel.find({}).populate({ path: 'product_id' });
-    req.session.cart_id = cart.map(item => item._id).toString();
-    //req.session.cart_id = cart._id
-    res.json(cart)
-})
 
-export const cartList = AsyncHandler(async (req, res) => {
-    let totalprice = await cartModel.aggregate([
-        {
-            $group: {
-                _id: null,
-                total: {
-                    $sum: "$price"
-                }
-            }
+    const cart = await cartModel.find({}).populate({ path: 'product_id' }).exec();
+
+    
+    //Set cookie
+    res.cookie('cart_session_id',  cart_session_id, {
+        maxAge: 1000 * 60 * 60 * 24 * 5, // 5 days
+        httpOnly: false,
+        secure: false, // Change to true if using HTTPS
+        sameSite: 'lax'
+    });
+
+    res.json(cart);
+});
+
+
+export const cartList = AsyncHandler(async (req: Request, res: Response): Promise<void> =>  {
+ // Access the cart_session_id cookie
+ const cartSessionId = req.cookies.cart_session_id;
+
+
+ if (!cartSessionId) {
+     res.status(400).json({ message: 'No cart session ID found.' });
+     return;
+ }
+
+ // Calculate the total price based on cart_session_id
+ const totalPrice = await cartModel.aggregate([
+    {
+        $match: {
+            cart_session_id: cartSessionId,
+          
         }
-    ])
-    const allcart = await cartModel.find({})
-        .populate({ path: 'product_id' })
-   const data:any = { allcart, totalprice }
-    res.json(data)
+    },
+     {
+         $group: {
+             _id: null,
+             total: { $sum: "$price" }
+         }
+     }
+ ]);
 
-    // const products = await productModel.find({})
-    //     .populate({ path: 'category_id' })
-    //     .populate({ path: 'subcategory_id' })
-    //     .populate({ path: 'listsubcategory_id' })
-    // res.json(products)
+ // Fetch all cart items for the given cart_session_id
+ const allCart = await cartModel.find({ cart_session_id: cartSessionId })
+     .populate({ path: 'product_id' });
+
+ // Prepare the response data
+ const data: any = { allCart, totalPrice: totalPrice[0]?.total || 0 }; // Handle case where totalPrice might be empty
+
+ res.json(data);
 })
 
 export const incQty = AsyncHandler(async (req, res) => {
-    const cartid:string = req.params.id
+    const cartSessionId = req.cookies.cart_session_id;
+
+
+    if (!cartSessionId) {
+        res.status(400).json({ message: 'No cart session ID found.' });
+        return;
+    }
+    const cartid: string = req.params.id
     const cart = await cartModel.findById({ _id: cartid }) as ICart | null;
 
     if (!cart) {
-      res.status(404).json({ success: false, message: "Cart item not found" });
-      return;
+        res.status(404).json({ success: false, message: "Cart item not found" });
+        return;
     }
     const productid = cart.product_id
-    const product = await productModel.findById({ _id: productid }) as IProduct | null;
+    const product = await productModel.findById({ _id: productid,cart_session_id: cartSessionId }) as IProduct | null;
     if (!product) {
         res.status(404).json({ success: false, message: "Product not found" });
         return;
-      }
+    }
     const price = product.price
     const qty = cart.quantity + Number(1)
     const cartPrice = cart.price + product.price
 
     const cartinc = await cartModel.findOneAndUpdate({ _id: cartid }, { quantity: qty, price: cartPrice }, { new: true })
     if (cartinc) {
-        let totalprice = await cartModel.aggregate([
+        let totalPrice = await cartModel.aggregate([
+            {
+                $match: {
+                    cart_session_id: cartSessionId,
+                  
+                }
+            },
             {
                 $group: {
                     _id: null,
@@ -134,36 +179,49 @@ export const incQty = AsyncHandler(async (req, res) => {
                 }
             }
         ])
-        const allcart = await cartModel.find({})
+        const allCart = await cartModel.find({ cart_session_id: cartSessionId })
             .populate({ path: 'product_id' })
-        const data = { allcart, totalprice }
+        const data = { allCart, totalPrice:totalPrice[0]?.total || 0 }
         res.json(data)
     }
 
 })
 
 export const descQty = AsyncHandler(async (req, res) => {
+    const cartSessionId = req.cookies.cart_session_id;
+
+
+    if (!cartSessionId) {
+        res.status(400).json({ message: 'No cart session ID found.' });
+        return;
+    }
     const cartid = req.params.id
     const cart = await cartModel.findById({ _id: cartid })
     if (!cart) {
         res.status(404).json({ success: false, message: "Cart item not found" });
         return;
-      }
+    }
     const productid = cart.product_id
-    const product = await productModel.findById({ _id: productid })
+    const product = await productModel.findById({ _id: productid,cart_session_id: cartSessionId})
     if (!product) {
         res.status(404).json({ success: false, message: "Product not found" });
         return;
-      }
+    }
     //const price = product.price
-    let allcart, data, totalprice
+    let allCart, data, totalPrice
 
     if (cart.quantity > 1) {
         const qty = cart.quantity - Number(1)
         const cartPrice = cart.price - Number(product.price)
         const cartdesc = await cartModel.findOneAndUpdate({ _id: cartid }, { quantity: qty, price: cartPrice }, { new: true })
         if (cartdesc) {
-            totalprice = await cartModel.aggregate([
+            totalPrice = await cartModel.aggregate([
+                {
+                    $match: {
+                        cart_session_id: cartSessionId,
+                      
+                    }
+                },
                 {
                     $group: {
                         _id: null,
@@ -173,20 +231,22 @@ export const descQty = AsyncHandler(async (req, res) => {
                     }
                 }
             ])
-            console.log(cartPrice, "lll")
-            allcart = await cartModel.find({})
+
+            allCart = await cartModel.find({ cart_session_id: cartSessionId })
                 .populate({ path: 'product_id' })
-           const data = { allcart, totalprice }
+            const data = { allCart, totalPrice:totalPrice[0]?.total || 0 }
             res.json(data)
         }
 
     } else {
-        //   const allprice =  await cartModel.aggregate([
-        //     {
-        //         $lookup:{from:'products', localField:'products_id',foreignField:'_id',as:'prod'}
-        //     },
-        // ])
-        totalprice = await cartModel.aggregate([
+
+        totalPrice = await cartModel.aggregate([
+            {
+                $match: {
+                    cart_session_id: cartSessionId,
+                  
+                }
+            },
             {
                 $group: {
                     _id: null,
@@ -196,10 +256,10 @@ export const descQty = AsyncHandler(async (req, res) => {
                 }
             }
         ])
-        allcart = await cartModel.find({})
+        allCart = await cartModel.find({ cart_session_id: cartSessionId })
             .populate({ path: 'product_id' })
 
-        const data = { allcart, totalprice }
+        const data = { allCart, totalPrice :totalPrice[0]?.total || 0}
         res.json(data)
     }
 
@@ -207,9 +267,16 @@ export const descQty = AsyncHandler(async (req, res) => {
 
 export const deleteCart = AsyncHandler(async (req: Request, res: Response): Promise<void> => {
     try {
+        const cartSessionId = req.cookies.cart_session_id;
+
+
+        if (!cartSessionId) {
+            res.status(400).json({ message: 'No cart session ID found.' });
+            return;
+        }
         const id: string = req.params.id;
         const cart = await cartModel.deleteOne({ _id: id });
-        
+
         if (cart) {
             const totalprice = await cartModel.aggregate([
                 {
@@ -222,8 +289,8 @@ export const deleteCart = AsyncHandler(async (req: Request, res: Response): Prom
                 }
             ]);
 
-            const allcart = await cartModel.find({}).populate({ path: 'product_id' });
-            const data = { allcart, totalprice };
+            const allCart = await cartModel.find({ cart_session_id: cartSessionId }).populate({ path: 'product_id' });
+            const data = { allCart, totalprice };
 
             res.status(200).json(data);
         }

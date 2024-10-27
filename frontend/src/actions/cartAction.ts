@@ -50,7 +50,7 @@ interface CartState {
 
 export const userCart = (id: string, toast: any, navigate: any, url: string) => async (dispatch: Dispatch, getState: () => { cartreducer: CartState }) => {
   try {
-    console.log("hi");
+    
     const { data } = await api.get<Product>(`api/v1/productbyid/${id}`);
     dispatch({
       type: CART_ADD_ITEM_BEFORE_LOGIN,
@@ -81,7 +81,7 @@ export const addToCart = (
 ) => async (dispatch: Dispatch, getState: any) => {
   try {
     dispatch({ type: ADDTO_CART_REQUEST });
-    await api.post(`/api/v1/addtocart/${id}/${qty}`).then((response) => {
+    await api.post(`/api/v1/addtocart/${id}/${qty}`,null,{withCredentials: true }).then((response) => {
       dispatch({ type: ADDTO_CART_SUCCESS, payload: response.data });
       let sum = 0;
       response.data.map((item: any) => {
@@ -121,7 +121,7 @@ export const removeFromCartBeforeLogin = (id: string) => (dispatch: Dispatch, ge
 export const CartList = () => (dispatch: Dispatch) => {
   try {
     dispatch({ type: CART_LIST_REQUEST });
-    api.get(`/api/v1/cart`).then((response) => {
+    api.get(`/api/v1/cart`,{withCredentials: true }).then((response) => {
       dispatch({ type: CART_LIST_SUCCESS, payload: response.data });
     }).catch((error) => {
       dispatch({
@@ -144,7 +144,7 @@ export const CartList = () => (dispatch: Dispatch) => {
 export const increaseQty = (id: string) => async (dispatch: Dispatch) => {
   try {
     dispatch({ type: INCQTY_REQUEST });
-    api.get(`/api/v1/incqty/${id}`).then((response) => {
+    api.get(`/api/v1/incqty/${id}`,{withCredentials: true }).then((response) => {
       dispatch({ type: INCQTY_SUCCESS, payload: response.data });
     }).catch((error) => {
       dispatch({
@@ -167,7 +167,7 @@ export const increaseQty = (id: string) => async (dispatch: Dispatch) => {
 export const decreaseQty = (id: string) => async (dispatch: Dispatch) => {
   try {
     dispatch({ type: DECQTY_REQUEST });
-    api.get(`/api/v1/descqty/${id}`).then((response) => {
+    api.get(`/api/v1/descqty/${id}`,{withCredentials: true }).then((response) => {
       dispatch({ type: DECQTY_SUCCESS, payload: response.data });
     }).catch((error) => {
       dispatch({
@@ -190,7 +190,7 @@ export const decreaseQty = (id: string) => async (dispatch: Dispatch) => {
 export const removeCart = (id: string) => async (dispatch: Dispatch) => {
   try {
     dispatch({ type: REMOVE_CART_REQUEST });
-    api.get(`/api/v1/deletecart/${id}`).then((response) => {
+    api.get(`/api/v1/deletecart/${id}`,{withCredentials: true }).then((response) => {
       dispatch({ type: REMOVE_CART_SUCCESS, payload: response.data });
     }).catch((error) => {
       dispatch({

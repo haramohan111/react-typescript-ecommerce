@@ -19,7 +19,7 @@ const Header = () => {
   const [cartc] = useCart()
   const userList = useSelector(state => state.userreducer)
   const { loginInfo } = userList
-  console.log(loginInfo.accessToken)
+  console.log(cartc)
   // useEffect(()=>{
 
   // },[])
@@ -48,9 +48,11 @@ const Header = () => {
               <div className="position-relative d-inline me-3">
                 <Link to="/cart" className="btn btn-primary">
                   <IconCart3 className="i-va" />
-                  <div className="position-absolute top-0 start-100 translate-middle badge bg-danger rounded-circle">
-                    {cartc?.length}
-                  </div>
+                  {cartc>0 ?
+                    <div className="position-absolute top-0 start-100 translate-middle badge bg-danger rounded-circle">
+                      {cartc}
+                    </div> : ""
+                  }
                 </Link>
               </div>
               {loginInfo.accessToken ?

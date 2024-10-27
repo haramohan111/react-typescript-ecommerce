@@ -27,7 +27,8 @@ const reducer = combineReducers({
     userreducer:userReducer,
     orderreducer:orderReducer,
     categoryreducer:categoryReducer,
-    subcategoryreducer:subcategoryReducer
+    subcategoryreducer:subcategoryReducer,
+
 })
 
 //checking varlid json

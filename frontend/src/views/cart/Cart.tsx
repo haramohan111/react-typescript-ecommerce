@@ -32,8 +32,8 @@ interface Cart {
   desc: string;
   discountprice: string;
   discountvalue: string;
-  totalprice: any;
-  allcart: CartItem[];
+  totalPrice: any;
+  allCart: CartItem[];
 
 }
 
@@ -62,10 +62,11 @@ const CartView = () => {
 
   const cartList = useSelector((state:RootState) => state.cartreducer)
   const {  cart,cartItems } = cartList
-  console.log( cartItems)
+
   const userList = useSelector((state:userRootreducer)=>state.userreducer)
   const {loginInfo} = userList
-  console.log(loginInfo)
+  console.log( cartList)
+  console.log( loginInfo)
   const navigate = useNavigate()
   const increaseqty = (ids: string) =>{
     dispatch(increaseQty(ids))
@@ -110,7 +111,7 @@ const CartView = () => {
   // console.log(cart?.allcart?.length !==cartc?.length,"check")
   const removeItemCart = (pid: any) =>{
     try{
-      if(cart?.allcart?.length !==cartc?.length){
+      if(cart?.allCart?.length !==cartc?.length){
   
         let myCart = [...cartc]
         let index = myCart.findIndex((item)=>item._id == pid)
@@ -125,9 +126,12 @@ const CartView = () => {
   const handleCheckout =(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>): void =>{
   event.preventDefault();
 
-  const loginInfo: string[] = [];
+  console.log(loginInfo)
+  console.log(loginInfo.length)
   if(loginInfo.length===0){
     navigate("/account/signin")
+  }else{
+    navigate("/checkout")
   }
   }
 
@@ -158,7 +162,7 @@ const CartView = () => {
                   <tbody>
                     {
 
-                      cart?.allcart?.map((cartlist, index) => (
+                      cart?.allCart?.map((cartlist, index) => (
                         <tr key={index}>
 
                           <td>
@@ -258,25 +262,25 @@ const CartView = () => {
               <div className="card-body">
                 <dl className="row border-bottom">
                   <dt className="col-6">Total price:</dt>
-                  {
-                    cart?.totalprice?.map((tp: { total: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; },index: React.Key | null | undefined)=>(
-                     <dd className="col-6 text-end" key={index}>{tp.total}</dd>
-                    ))
-                  }
+           
+                    
+                  <dd className="col-6 text-end" >{cart?.totalPrice}</dd>
+                   
+          
                   
 
                   <dt className="col-6 text-success">Discount:</dt>
-                  <dd className="col-6 text-success text-end">-&#8360; {cart?.discountvalue}</dd>
+                  <dd className="col-6 text-success text-end">-&#8360; {cart?.discountvalue}0</dd>
                   <dt className="col-6 text-success">
                     Coupon:{" "}
                     <span className="small text-muted">EXAMPLECODE</span>{" "}
                   </dt>
-                  <dd className="col-6 text-success text-end">&#8360; {cart?.discountprice}</dd>
+                  <dd className="col-6 text-success text-end">&#8360; {cart?.discountprice}0</dd>
                 </dl>
                 <dl className="row">
                   <dt className="col-6">Total:</dt>
                   <dd className="col-6 text-end  h5">
-                    <strong>&#8360; {cart?.discountprice}</strong>
+                    <strong>&#8360; {cart?.totalPrice}</strong>
                   </dd>
                 </dl>
                 <hr />
