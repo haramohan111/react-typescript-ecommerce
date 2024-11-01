@@ -37,10 +37,14 @@ const verifySchema = new mongoose_1.Schema({
     token: {
         type: String,
     },
+    user_session_id: {
+        type: String,
+        required: true
+    },
     expireAt: {
         type: Date,
         default: () => (0, moment_timezone_1.default)().tz('Asia/Kolkata').add(24, 'minutes').toDate(),
-        index: { expires: 1440 }
+        index: { expires: 0 }
     }
 }, { timestamps: true });
 const Verify = mongoose_1.default.model("Verify", verifySchema);

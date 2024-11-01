@@ -14,6 +14,7 @@ import { ReactComponent as IconHdd } from "bootstrap-icons/icons/hdd.svg";
 import { ReactComponent as IconUpcScan } from "bootstrap-icons/icons/upc-scan.svg";
 import { ReactComponent as IconTools } from "bootstrap-icons/icons/tools.svg";
 import { listProducts } from "../actions/productActions";
+import { verifyUser } from "../actions/userAction";
 
 
 const Support = lazy(() => import("../components/Support"));
@@ -66,7 +67,7 @@ const HomeView: React.FC = () => {
     dispatch(listProducts());
   }, [dispatch]);
 
-  
+
 
   let components: { [key: string]: React.FunctionComponent<React.SVGProps<SVGSVGElement>> } = {
     IconLaptop: IconLaptop,

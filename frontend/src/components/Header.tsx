@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { useSelector, useDispatch } from 'react-redux'
+import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from "react-router-dom";
 import Search from "./Search";
 import { ReactComponent as IconCart3 } from "bootstrap-icons/icons/cart3.svg";
@@ -13,21 +13,53 @@ import { ReactComponent as IconInfoCircleFill } from "bootstrap-icons/icons/info
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../context/cartContext";
-import { userlogout } from "../actions/userAction";
+import { userlogout, verifyUser } from "../actions/userAction";
+import { ThunkDispatch } from 'redux-thunk';
+import { AnyAction } from 'redux';
+import { useAuth } from "../context/auth";
 
-const Header = () => {
-  const [cartc] = useCart()
-  const userList = useSelector(state => state.userreducer)
-  const { loginInfo } = userList
-  console.log(cartc)
-  // useEffect(()=>{
-
-  // },[])
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const handleLogout = () => {
-    dispatch(userlogout(navigate))
+interface UserState {
+  loginInfo: {
+    accessToken?: string; // Make accessToken optional
+    success?: string[];
+  };
+  userverify:{
+    success:boolean;
+    message:string;
   }
+  register: any[]; // Initialize register with an empty array
+  authcheck: any[]; // Initialize authcheck with an empty array
+}
+
+interface RootState {
+  userreducer: UserState;
+}
+
+const Header: React.FC = () => {
+  const [cartItems] = useCart();
+  const [auth] = useAuth();
+  // const userList = useSelector((state: RootState) => state.userreducer);
+  // const { loginInfo,userverify } = userList;
+  //const[checklog,setChecklog]= useState<boolean>(false);
+  const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
+  const navigate = useNavigate();
+  console.log(auth)
+  // useEffect(() => {
+  //   dispatch(verifyUser());
+  // }, [dispatch]);
+
+  // useEffect(() => {
+  //   if (auth) {
+  //     setChecklog(true);
+  //   } else {
+  //     setChecklog(false);
+  //   }
+  // }, [auth]);
+
+  const handleLogout = () => {
+    dispatch(userlogout(navigate));
+  };
+
   return (
     <React.Fragment>
       <header className="p-3 border-bottom bg-light">
@@ -35,10 +67,7 @@ const Header = () => {
           <div className="row g-3">
             <div className="col-md-3 text-center">
               <Link to="/">
-                <img
-                  alt="logo"
-                  src="../../images/logo.webp"
-                />
+                <img alt="logo" src="../../images/logo.webp" />
               </Link>
             </div>
             <div className="col-md-5">
@@ -48,15 +77,14 @@ const Header = () => {
               <div className="position-relative d-inline me-3">
                 <Link to="/cart" className="btn btn-primary">
                   <IconCart3 className="i-va" />
-                  {cartc>0 ?
+                  {cartItems.length > 0 && (
                     <div className="position-absolute top-0 start-100 translate-middle badge bg-danger rounded-circle">
-                      {cartc}
-                    </div> : ""
-                  }
+                      {cartItems.length}
+                    </div>
+                  )}
                 </Link>
               </div>
-              {loginInfo.accessToken ?
-
+              {  auth?(
                 <div className="btn-group">
                   <button
                     type="button"
@@ -107,25 +135,21 @@ const Header = () => {
                     </li>
                     <li>
                       <Link className="dropdown-item" to="/">
-                        <IconDoorClosedFill className="text-danger" /> <button onClick={handleLogout} >Logout</button>
+                        <IconDoorClosedFill className="text-danger" /> 
+                        <button onClick={handleLogout} style={{ background: 'none', border: 'none', padding: 0 }}>
+                          Logout
+                        </button>
                       </Link>
                     </li>
                   </ul>
-                </div> :
-
+                </div>
+              ) : (
                 <div className="position-relative d-inline me-3">
                   <Link to="/account/signin" className="btn btn-primary">
                     Sign In
                   </Link>
                 </div>
-
-              }
-
-
-
-
-              {/* <Link to="/account/signin">Sign In</Link> |{" "}
-              <Link to="/account/signup"> Sign Up</Link> */}
+              )}
             </div>
           </div>
         </div>
@@ -133,4 +157,5 @@ const Header = () => {
     </React.Fragment>
   );
 };
+
 export default Header;

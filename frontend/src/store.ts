@@ -12,7 +12,8 @@ import { userReducer } from './reducers/userReducer'
 import { orderReducer } from './reducers/orderReducer'
 import { categoryReducer } from './reducers/categoryReducer'
 import { subcategoryReducer } from './reducers/subcategoryReducer'
-
+import { createLogger } from 'redux-logger';
+import authMiddleware from './middleware/authMiddleware';
 const shippingAddressFromStorage = localStorage.getItem("shippingaddress")
   ? JSON.parse(localStorage.getItem("shippingaddress") as string)
   : {};
@@ -56,7 +57,8 @@ const initialState = {
       },
 
 }
-const middleware = [thunk]
+const logger = createLogger();
+const middleware = [thunk,authMiddleware]
 const store = createStore(
     reducer, 
     initialState, 

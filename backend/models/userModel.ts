@@ -61,7 +61,6 @@ userSchema.pre('save', async function (next) {
 });
 
 userSchema.methods.matchPassword = async function (enteredpassword:string) {
-console.log("pass",this.password)
 
 if (!this.password) {
     throw new Error('Password is undefined');

@@ -101,7 +101,7 @@ router.post('/logout', async (req: Request, res: Response) => {
 
 router.post('/refresh', async (req: Request, res: Response) => {
   const { refreshToken } = req.body;
-  console.log("refreshToken", refreshToken);
+  // console.log("refreshToken", refreshToken);
   try {
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!) as { id: string };
     if (!decoded) {
@@ -121,12 +121,13 @@ router.post('/refresh', async (req: Request, res: Response) => {
 interface DecodedToken extends JwtPayload {
   id: string;
 }
+
 router.post('/verify', async (req: Request, res: Response) => {
   const { atoken } = req.body;
 
   try {
     const decode = jwt.verify(atoken, process.env.REFRESH_TOKEN_SECRET!) as DecodedToken;
-console.log(decode.id)
+  
     const decodeUser = await Verify.findOne({user_id:decode.id});
     console.log(decodeUser)
     if (!decodeUser) {

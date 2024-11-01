@@ -41,12 +41,14 @@ const CheckoutView = () => {
 
   
   interface Cart {
-    totalprice: any;
-    allcart: CartItem[];
+    totalPrice: any;
+    allCart: CartItem[];
 
   }
   
   interface CartState {
+    totalPrice: any;
+    allCart: any;
     cart: Cart;
     shippingAddress: string;
     paymentMethod: string;
@@ -65,14 +67,22 @@ const CheckoutView = () => {
     userreducer:UserState
   }
 
-  
+  const [auth] = useAuth();
+  const[checklog,setChecklog]= useState<boolean>(false);
   const cart = useSelector((state:RootState) => state.cartreducer)
+
   const userLogin = useSelector((state:userRootreducer) => state.userreducer);
   const { loginInfo } = userLogin;
-  console.log(loginInfo)
-  //   console.log(auth)
+  console.log(loginInfo);
   useEffect(() => {
-    if (loginInfo == null) {
+    if (auth) {
+      setChecklog(true);
+    } else {
+      setChecklog(false);
+    }
+  }, [auth]);
+  useEffect(() => {
+    if (checklog) {
 
       navigate("/account/signin")
     }
@@ -88,10 +98,10 @@ const CheckoutView = () => {
     }
     dispatch(
       createOrder({
-        orderItems: cart.cart.allcart,
+        orderItems: cart?.cart?.allCart,
         shippingAddress: shippingAdd,
         paymentMethod: "online",
-        itemsPrice: cart.cart.totalprice[0].total,
+        itemsPrice: cart?.cart?.totalPrice,
         shippingPrice: "50",
         taxPrice: "1000",
         totalPrice: "1000",
@@ -409,37 +419,25 @@ const CheckoutView = () => {
                 <span className="badge bg-secondary float-end">3</span>
               </div>
               <ul className="list-group list-group-flush">
+             { cart?.cart?.allCart?.map((cartlist: any) => (
                 <li className="list-group-item d-flex justify-content-between lh-sm">
                   <div>
-                    <h6 className="my-0">Product name</h6>
+                    <h6 className="my-0">{cartlist.product_id.name}</h6>
                     <small className="text-muted">Brief description</small>
                   </div>
-                  <span className="text-muted">$150</span>
+                  <span className="text-muted">{cartlist.product_id.price}</span>
                 </li>
-                <li className="list-group-item d-flex justify-content-between lh-sm">
-                  <div>
-                    <h6 className="my-0">Second product</h6>
-                    <small className="text-muted">Brief description</small>
-                  </div>
-                  <span className="text-muted">$12</span>
-                </li>
-                <li className="list-group-item d-flex justify-content-between lh-sm">
-                  <div>
-                    <h6 className="my-0">Third item</h6>
-                    <small className="text-muted">Brief description</small>
-                  </div>
-                  <span className="text-muted">$50</span>
-                </li>
-                <li className="list-group-item d-flex justify-content-between bg-light">
+             ))}
+                {/* <li className="list-group-item d-flex justify-content-between bg-light">
                   <div className="text-success">
                     <h6 className="my-0">Promo code</h6>
                     <small>EXAMPLECODE</small>
                   </div>
                   <span className="text-success">−$50</span>
-                </li>
+                </li> */}
                 <li className="list-group-item d-flex justify-content-between">
                   <span>Total (USD)</span>
-                  <strong>$162</strong>
+                  <strong>Rs {cart?.cart?.totalPrice}</strong>
                 </li>
               </ul>
             </div>

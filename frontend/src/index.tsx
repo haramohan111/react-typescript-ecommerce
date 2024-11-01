@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import { Provider } from "react-redux";
 import store from "./store";
 import { CartProvider } from "./context/cartContext";
+import { AuthProvider } from "./context/auth";
 // import { AuthProvider } from "./context/auth";
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -13,9 +14,11 @@ const root = ReactDOM.createRoot(
 root.render(
 
   <Provider store={store}>
+    <AuthProvider>
     <CartProvider>
       <App />
     </CartProvider>
+    </AuthProvider>
   </Provider>
 );
 

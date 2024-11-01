@@ -13,7 +13,7 @@ import api from '../utils/api';
 export const listProducts = () => async (dispatch: Dispatch) => {
   try {
     dispatch({ type: PRODUCT_LIST_REQUEST });
-    const { data } = await api.get("api/v1/products");
+    const { data } = await api.get("api/v1/products", { withCredentials: true });
     dispatch({ type: PRODUCT_LIST_SUCCESS, payload: data });
   } catch (error: any) {
     dispatch({

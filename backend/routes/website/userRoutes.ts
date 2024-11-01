@@ -3,6 +3,9 @@ import { registerUser, loginUser, getUserProfile } from '../../controller/userCo
 import { protect } from '../../middleware/authMiddleware';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import userModel from '../../models/userModel';
+import { decrypt, encrypt } from '../../utils/cryptoUtils';
+import Verify from '../../models/verifyModel';
+import mongoose from 'mongoose';
 
 interface CustomRequest extends Request {
   user?: any; // Modify this according to your user type
@@ -16,48 +19,7 @@ router.post('/signup', (req: Request, res: Response, next: NextFunction) => regi
 router.post('/userlogin', (req: Request, res: Response, next: NextFunction) => loginUser(req, res, next));
 router.get('/profile', protect, (req: CustomRequest, res: Response, next: NextFunction) => getUserProfile(req, res, next));
 
-router.post('/userlogout', async (req: Request, res: Response) => {
-  try {
-    const authHeader = req.headers.authorization;
-    const token: string | undefined = authHeader && authHeader.split(' ')[1];
-    if (!token) {
-      res.status(200).send({ message: 'You have been Logged Out' });
-      return;
-    }
 
-    const secret = process.env.ACCESS_TOKEN_SECRET;
-    if (!secret) {
-      throw new Error('ACCESS_TOKEN_SECRET is not defined');
-    }
-
-    const decoded = jwt.verify(token, secret) as DecodedToken
-    //console.log({ web: "web", id: (decoded as JwtPayload).id, token });
-
-    const decodeUser = await userModel.findById(decoded.id) ;
-    if (decodeUser) {
-      res.status(200).send({ message: 'You have been Logged Out' });
-    }else{
-      res.status(200).send({ message: 'You have been Logged Out' });
-    }
-
-
-    
-  } catch (error) {
-    // res.status(400).send({ error: e, message: 'Logged out failed' });
-    if (error instanceof Error) {
-    if (error.name === 'TokenExpiredError') {
-      console.error('Token has expired:', error);
-      res.status(401).json({ message: 'Token has expired' });
-    } else {
-      console.error('Token verification failed:', error);
-      res.status(403).json({ message: 'Invalid token' });
-    }
-  }else {
-    console.error('Unexpected error:', error);
-    res.status(500).json({ message: 'An unexpected error occurred' });
-  }
-  }
-});
 
 router.post('/userrefresh', async (req: Request, res: Response) => {
   const { refreshToken } = req.body;
@@ -79,4 +41,75 @@ router.post('/userrefresh', async (req: Request, res: Response) => {
   }
 });
 
+router.post('/userverify', async (req: Request, res: Response) => {
+  const cookieData = req.cookies.uid;
+  if(cookieData){
+    const decoded = jwt.verify(cookieData, process.env.ACCESS_TOKEN_SECRET!) as { id: string };
+    if (decoded) {
+  
+
+      const userId = decoded.id;
+      const user_sess_id =req.session.user_session_id;
+      try {
+  
+     
+        const decodeUser = await Verify.find({ user_id: userId,user_session_id:user_sess_id });
+  
+        if (decodeUser) {
+          console.log('true');
+          res.status(200).send({ success: true, message: 'Session in' });
+        } else {
+          console.log('false');
+          res.status(200).send({ success: false, message: 'Session out' });
+        }
+  
+      } catch (error: any) {
+        console.log(error);
+        res.status(400).send({ success: false, message: 'Invalid user ID' });
+      }
+    } else {
+
+      res.status(200).send({ success: false, message: 'Session out' });
+    }
+  }else{
+    res.status(200).send({ success: false, message: 'Session out' });
+  }
+
+});
+
+router.post('/userlogout', async (req: Request, res: Response) => {
+  try {
+
+    // req.session.destroy(err => {
+    //   if (err) {
+    //     return res.status(500).send('Could not log out.');
+    //   }
+    //   res.clearCookie('uid');
+    //   res.status(200).send({ success: false, message: 'You have been Logged Out' });
+    // });
+    // console.log(req.session)
+    const cookieData = req.cookies.uid;
+   const user_sess_id =req.session.user_session_id;
+    if(cookieData){
+      const decoded = jwt.verify(cookieData, process.env.ACCESS_TOKEN_SECRET!) as { id: string };
+      const userId = decoded.id;
+      const userDelete = await Verify.deleteOne({ user_id: userId,user_session_id:user_sess_id });
+      console.log(userDelete);
+      if (userDelete.acknowledged) {
+        res.clearCookie('uid');
+        res.status(200).send({ success: false, message: 'Session out' });
+      }
+    }else{
+      res.clearCookie('uid');
+      res.status(200).send({ success: false, message: 'Session out' });
+    }
+  } catch (error) {
+    // res.status(400).send({ error: e, message: 'Logged out failed' });
+    if (error instanceof Error) {
+
+      console.error('Token has expired:', error);
+
+    }
+  }
+});
 export default router;

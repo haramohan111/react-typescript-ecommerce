@@ -83,7 +83,6 @@ userSchema.pre('save', function (next) {
 });
 userSchema.methods.matchPassword = function (enteredpassword) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log("pass", this.password);
         if (!this.password) {
             throw new Error('Password is undefined');
         }

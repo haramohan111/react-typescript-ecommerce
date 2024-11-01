@@ -18,5 +18,13 @@ export function generateRefreshToken(id: string): string {
     return token;
 }
 
+export function verifyToken(id: string): string {
+    const token = sign({ id }, process.env.ACCESS_TOKEN_SECRET as string, {
+        algorithm: 'HS256',
+        expiresIn: '1h'
+    });
+    return token;
+}
+
 
 //export default generateToken

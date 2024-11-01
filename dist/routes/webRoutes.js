@@ -89,7 +89,7 @@ router.post('/logout', (req, res) => __awaiter(void 0, void 0, void 0, function*
 }));
 router.post('/refresh', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { refreshToken } = req.body;
-    console.log("refreshToken", refreshToken);
+    // console.log("refreshToken", refreshToken);
     try {
         const decoded = jsonwebtoken_1.default.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
         if (!decoded) {
@@ -110,7 +110,6 @@ router.post('/verify', (req, res) => __awaiter(void 0, void 0, void 0, function*
     const { atoken } = req.body;
     try {
         const decode = jsonwebtoken_1.default.verify(atoken, process.env.REFRESH_TOKEN_SECRET);
-        console.log(decode.id);
         const decodeUser = yield verifyModel_1.default.findOne({ user_id: decode.id });
         console.log(decodeUser);
         if (!decodeUser) {

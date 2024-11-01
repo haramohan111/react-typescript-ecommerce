@@ -4,7 +4,8 @@ import mongoose from 'mongoose';
 import userModel from "../models/userModel";
 import asyncHandler from "express-async-handler";
 import { hashPassword } from "../helpers/authHelper";
-import { generateAccessToken, generateRefreshToken } from "../utils/generateToken";
+import { generateAccessToken, generateRefreshToken, verifyToken } from "../utils/generateToken";
+import Verify from '../models/verifyModel';
 
 
 interface IUser {
@@ -19,8 +20,10 @@ interface IUser {
 declare module 'express-session' {
     interface SessionData {
         user: string;
+        userId: string;
         isadmin: string;
         isMobile: string;
+        user_session_id:string;
     }
 }
 
@@ -91,38 +94,47 @@ export const loginUser = asyncHandler(async (req: Request, res: Response): Promi
     const { mobileNo, password } = req.body as ILUser;
     const user = await userModel.findOne({ mobile: mobileNo }).select("-createdAt -updatedAt").exec() as IUser | null;
 
-    if(!user) res.status(401).send('User not found please SignUp');
+    if (!user) res.status(401).send('User not found please SignUp');
     // if (user) {
     //     const isMatch = await user.matchPassword(password);
     //     console.log('Password Match:', isMatch)
     // }
-   if(user)
-    //console.log("check",await user.matchPassword(password))
-    if (user && await user.matchPassword(password)) {
-        console.log(user)
-        const accessToken = generateAccessToken(user._id.toString());
-        const refreshToken = generateRefreshToken(user._id.toString());
-        res.cookie("accessToken", accessToken);
+    if (user)
+        //console.log("check",await user.matchPassword(password))
+        if (user && await user.matchPassword(password)) {
 
-        if (user) {
-            // Ensure _id is asserted to be a string
-            var userId: string = user._id.toString();
-            res.status(200).send({
-                success: true,
-                message: "User login successfully",
-                accessToken,
-                refreshToken,
+            const accessToken = generateAccessToken(user._id.toString());
+            const refreshToken = generateRefreshToken(user._id.toString());
+            //res.cookie("accessToken", accessToken);
+
+            if (user) {
+                // Ensure _id is asserted to be a string
+                // req.session.cookie.maxAge = 1000 * 60 * 60;
+                //req.session.userId = user._id.toString();
+                const user_session_id= "id" + Math.random().toString(16).slice(2)
+                req.session.user_session_id = user_session_id;
+                const userId = new mongoose.Types.ObjectId(user._id);
+                await Verify.create({user_id: userId,user_session_id});
+                // const verify = await Verify.find({user_id:userId});
+                // let verifyuser;
+                // if(!verify){
+                // verifyuser = await Verify.create({user_id: userId});
+                // }
+                const encryptedData = verifyToken(user._id.toString());
+                res.cookie('uid', encryptedData,{ maxAge: 24 * 60 * 1000, httpOnly: false})
+                res.status(200).send({
+                    success: true,
+                    message: "User login successfully",
+                    accessToken,
+                    refreshToken,
+                });
+            }
+        } else {
+            res.status(401).send({
+                success: false,
+                message: "Invalid mobile or password"
             });
         }
-
-
-
-    } else {
-        res.status(401).send({
-            success: false,
-            message: "Invalid mobile or password"
-        });
-    }
 });
 
 

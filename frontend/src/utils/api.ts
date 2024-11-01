@@ -2,7 +2,7 @@
 import axios, { AxiosRequestConfig,InternalAxiosRequestConfig } from 'axios';
 import { navigateTo } from './navigationHelper';
 
-const apiUrl = process.env.REACT_APP_API_URL
+export const apiUrl = process.env.REACT_APP_API_URL
 const api = axios.create({
   baseURL: `${apiUrl}`, // Your backend URL
 });

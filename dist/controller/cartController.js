@@ -74,9 +74,7 @@ exports.cartList = (0, express_async_handler_1.default)((req, res) => __awaiter(
     // Calculate the total price based on cart_session_id
     const totalPrice = yield cartModel_1.default.aggregate([
         {
-            $match: {
-                cart_session_id: cartSessionId,
-            }
+            $match: { cart_session_id: cartSessionId, }
         },
         {
             $group: {
@@ -88,8 +86,9 @@ exports.cartList = (0, express_async_handler_1.default)((req, res) => __awaiter(
     // Fetch all cart items for the given cart_session_id
     const allCart = yield cartModel_1.default.find({ cart_session_id: cartSessionId })
         .populate({ path: 'product_id' });
+    const userId = req.session.userId;
     // Prepare the response data
-    const data = { allCart, totalPrice: ((_a = totalPrice[0]) === null || _a === void 0 ? void 0 : _a.total) || 0 }; // Handle case where totalPrice might be empty
+    const data = { allCart, totalPrice: ((_a = totalPrice[0]) === null || _a === void 0 ? void 0 : _a.total) || 0, userId }; // Handle case where totalPrice might be empty
     res.json(data);
 }));
 exports.incQty = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

@@ -13,9 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUserProfile = exports.loginUser = exports.registerUser = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const generateToken_1 = require("../utils/generateToken");
+const verifyModel_1 = __importDefault(require("../models/verifyModel"));
 exports.registerUser = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { firstName, lastName, mobileNo, password, status } = req.body;
@@ -70,13 +72,24 @@ exports.loginUser = (0, express_async_handler_1.default)((req, res) => __awaiter
     if (user)
         //console.log("check",await user.matchPassword(password))
         if (user && (yield user.matchPassword(password))) {
-            console.log(user);
             const accessToken = (0, generateToken_1.generateAccessToken)(user._id.toString());
             const refreshToken = (0, generateToken_1.generateRefreshToken)(user._id.toString());
-            res.cookie("accessToken", accessToken);
+            //res.cookie("accessToken", accessToken);
             if (user) {
                 // Ensure _id is asserted to be a string
-                var userId = user._id.toString();
+                // req.session.cookie.maxAge = 1000 * 60 * 60;
+                //req.session.userId = user._id.toString();
+                const user_session_id = "id" + Math.random().toString(16).slice(2);
+                req.session.user_session_id = user_session_id;
+                const userId = new mongoose_1.default.Types.ObjectId(user._id);
+                yield verifyModel_1.default.create({ user_id: userId, user_session_id });
+                // const verify = await Verify.find({user_id:userId});
+                // let verifyuser;
+                // if(!verify){
+                // verifyuser = await Verify.create({user_id: userId});
+                // }
+                const encryptedData = (0, generateToken_1.verifyToken)(user._id.toString());
+                res.cookie('uid', encryptedData, { maxAge: 24 * 60 * 1000, httpOnly: false });
                 res.status(200).send({
                     success: true,
                     message: "User login successfully",

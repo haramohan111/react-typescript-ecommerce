@@ -14,6 +14,7 @@ import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { CartList, coupon, decreaseQty, increaseQty, removeCart } from "../../actions/cartAction";
 import { useCart } from "../../context/cartContext";
+import { useAuth } from "../../context/auth";
 
 
 const CouponApplyForm = lazy(() => import("../../components/others/CouponApplyForm"));
@@ -49,7 +50,9 @@ interface RootState{
 }
 
 interface UserState{
-  loginInfo :string[],
+  loginInfo :{
+    success:string[],
+  }
   register: [], // Initialize register
   authcheck: [], // Initialize authcheck
 }
@@ -59,14 +62,15 @@ interface userRootreducer{
 const CartView = () => {
   const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
   const [cartc,setCartc] = useCart()
-
+  const [auth] = useAuth();
+  // const[checklog,setChecklog]= useState<boolean>(false);
   const cartList = useSelector((state:RootState) => state.cartreducer)
   const {  cart,cartItems } = cartList
 
-  const userList = useSelector((state:userRootreducer)=>state.userreducer)
-  const {loginInfo} = userList
-  console.log( cartList)
-  console.log( loginInfo)
+  // const userList = useSelector((state:userRootreducer)=>state.userreducer)
+  // const {loginInfo} = userList
+  // console.log( cartList)
+  // console.log( userList)
   const navigate = useNavigate()
   const increaseqty = (ids: string) =>{
     dispatch(increaseQty(ids))
@@ -88,8 +92,14 @@ const CartView = () => {
     console.log(e)
   }
   }
-  
-
+  console.log(auth)
+  // useEffect(() => {
+  //   if (auth) {
+  //     setChecklog(true);
+  //   } else {
+  //     setChecklog(false);
+  //   }
+  // }, [auth]);
   useEffect(() => {
     if(localStorage.getItem("cpcode")){
       dispatch(coupon(localStorage.getItem("cpcode") as string))
@@ -106,7 +116,7 @@ const CartView = () => {
     localStorage.setItem("cpcode",values.coupon)
     dispatch(coupon(values.coupon))
   };
-  // console.log(cart?.allcart?.length,"cart length")
+  console.log(cart?.allCart?.length,"cart length")
   // console.log(cartc?.length,"quantity")
   // console.log(cart?.allcart?.length !==cartc?.length,"check")
   const removeItemCart = (pid: any) =>{
@@ -123,16 +133,17 @@ const CartView = () => {
       console.log(e)
     }
   }
+
   const handleCheckout =(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>): void =>{
   event.preventDefault();
+ if(cart?.allCart?.length == 0){
+  navigate("/")
+ }else{
+  navigate("/checkout")
+ }
 
-  console.log(loginInfo)
-  console.log(loginInfo.length)
-  if(loginInfo.length===0){
-    navigate("/account/signin")
-  }else{
-    navigate("/checkout")
-  }
+ 
+    
   }
 
   return (
