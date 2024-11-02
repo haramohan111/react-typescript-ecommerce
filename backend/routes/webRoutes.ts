@@ -22,7 +22,8 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 
 import {
   createOrder,
-  orderPagination
+  customerAddress,
+  orderPagination,
 } from '../controller/orderController';
 import userModel from '../models/userModel';
 import Verify from '../models/verifyModel';
@@ -49,8 +50,7 @@ router.post('/adminlogin', (req: Request, res: Response, next: NextFunction) => 
 // router.get("/authcheck/:id", (req: Request, res: Response, next: NextFunction) => authCheck(req, res, next));
 router.post('/createorder', (req: Request, res: Response, next: NextFunction) => createOrder(req, res, next));
 router.get('/orderpagination', (req: Request, res: Response, next: NextFunction) => orderPagination(req, res, next));
-
-
+router.get('/customeraddress', (req: Request, res: Response, next: NextFunction) => customerAddress(req, res, next));
 
 router.post('/logout', async (req: Request, res: Response) => {
   try {

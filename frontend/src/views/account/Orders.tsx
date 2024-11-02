@@ -9,16 +9,10 @@ import {
   faFileInvoice,
 } from "@fortawesome/free-solid-svg-icons";
 
-interface OrdersViewProps {}
 
-interface OrdersViewState {}
 
-class OrdersView extends Component<OrdersViewProps, OrdersViewState> {
-  constructor(props: OrdersViewProps) {
-    super(props);
-    this.state = {};
-  }
-  render() {
+  const OrdersView = () => {
+
     return (
       <div className="container mb-3">
         <h4 className="my-3">Orders</h4>
@@ -278,7 +272,7 @@ class OrdersView extends Component<OrdersViewProps, OrdersViewState> {
         </div>
       </div>
     );
-  }
+  
 }
 
 export default OrdersView;

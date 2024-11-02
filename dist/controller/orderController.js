@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.orderPagination = exports.createOrder = exports.verifyPayment = exports.checkout = void 0;
+exports.orderPagination = exports.verifyPayment = exports.createOrder = exports.customerAddress = exports.checkout = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const razorpay_1 = __importDefault(require("razorpay"));
 const crypto_1 = __importDefault(require("crypto"));
 const orderModel_1 = __importDefault(require("../models/orderModel"));
-const mongoose_1 = __importDefault(require("mongoose"));
+const customerModel_1 = __importDefault(require("../models/customerModel"));
+const cartModel_1 = __importDefault(require("../models/cartModel"));
 // exports.createOrder = AsyncHandler(async (req, res) => {
 //     var instance = new Razorpay({
 //         key_id: process.env.KEY_ID,
@@ -50,9 +51,71 @@ exports.checkout = (0, express_async_handler_1.default)((req, res) => __awaiter(
         order
     });
 }));
+exports.customerAddress = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    res.json([{
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "phone": "1234567890",
+            "address": "123 Main St, Cityville, ST, 12345",
+            "county": "India",
+            "state": "Odisha",
+            "city": "Chicago",
+            "zip": "4446767",
+        },
+        {
+            "name": "Jane Smith",
+            "email": "jane.smith@example.com",
+            "phone": "0987654321",
+            "address": "456 Elm St, Cityville, ST, 54321",
+            "county": "India",
+            "state": "Maharashtra",
+            "city": "Chicago",
+            "zip": "444535767",
+        },
+        {
+            "name": "Alice Johnson",
+            "email": "alice.johnson@example.com",
+            "phone": "1122334455",
+            "address": "789 Maple St, Cityville, ST, 67890",
+            "county": "India",
+            "state": "Karnataka",
+            "city": "mahisy",
+            "zip": "53453",
+        }]);
+}));
+exports.createOrder = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { orderItems, shippingAddress, taxPrice, shippingPrice, itemsPrice, paymentMethod, postalCode, state, city } = req.body;
+    const userIdFromSession = "67138ee0d2499cc5ad4916ce";
+    if (!userIdFromSession) {
+        res.status(400).json({ message: "Invalid or missing user ID" });
+    }
+    const customer = yield customerModel_1.default.create(shippingAddress);
+    const order = yield orderModel_1.default.create({
+        user: userIdFromSession,
+        orderItems,
+        shippingAddress: customer._id,
+        taxPrice,
+        shippingPrice,
+        totalPrice: itemsPrice,
+        payment: paymentMethod,
+        postalCode: postalCode,
+        city: city,
+        country: state
+    });
+    if (order) {
+        const odid = order._id.toString();
+        req.session.order_id = odid; // Ensure order_id is properly set as a string
+        console.log(order._id);
+    }
+    res.status(200).json({
+        success: true,
+        order
+    });
+}));
 exports.verifyPayment = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.body);
     const sorder_id = req.session.order_id;
+    const cartSessionId = req.cookies.cart_session_id;
+    console.log(sorder_id);
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSign = crypto_1.default
@@ -67,29 +130,15 @@ exports.verifyPayment = (0, express_async_handler_1.default)((req, res) => __awa
             isPaid: true,
             paidAt: Date.now()
         });
+        const carts = yield cartModel_1.default.find({ cart_session_id: cartSessionId });
+        if (carts.length > 0) {
+            yield cartModel_1.default.updateMany({ cart_session_id: cartSessionId }, { $set: { status: 0 } });
+        }
         res.redirect("http://localhost:3000/account/orders");
     }
     else {
         res.status(400).json({ message: "Invalid signature sent!" });
     }
-}));
-exports.createOrder = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { orderItems, shippingAddress, taxPrice, shippingPrice, itemsPrice } = req.body;
-    const order = yield orderModel_1.default.create({
-        user_id: new mongoose_1.default.Types.ObjectId("23jh23g2"),
-        orderItems,
-        shippingAddress,
-        taxPrice,
-        shippingPrice,
-        totalPrice: itemsPrice
-    });
-    // if(order){
-    //     req.session.order_id = order._id.toString(); // Ensure order_id is properly set as a string
-    // }
-    res.status(200).json({
-        success: true,
-        order
-    });
 }));
 exports.orderPagination = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const search = req.query.search;

@@ -25,7 +25,7 @@ app.use((0, cookie_parser_1.default)());
 app.use((0, express_session_1.default)({
     secret: 'ghfffniyiuyiyiynn789789', // Change this to a strong secret
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     store: connect_mongo_1.default.create({ mongoUrl: 'mongodb://localhost:27017/react-typescript-ecommerce' }), // Store sessions in MongoDB
     cookie: {
         secure: false, // Set to true if using HTTPS
@@ -44,7 +44,9 @@ app.use((req, res, next) => {
     console.log("req.path", req.path);
     const openRoutes = ['/api/v1/adminlogin', '/api/v1/managefrontcategory',
         '/api/v1/cart', '/api/v1/products', '/api/v1/logout', '/api/v1/refresh',
-        '/api/v1/verify', '/api/v1/userlogin', '/api/v1/userrefresh', '/api/v1/signup', '/api/v1/userverify', '/api/v1/userlogout'];
+        '/api/v1/verify', '/api/v1/userlogin', '/api/v1/userrefresh', '/api/v1/signup',
+        '/api/v1/userverify', '/api/v1/userlogout', '/api/v1/payment', "/api/v1/paymentverify", "/set-session",
+        "/api/v1/get-session", "/api/v1/get-sessions"];
     const dynamicOpenRoutes = /^\/api\/v1\/(addtocart|incqty|descqty|deletecart|productbyid)\/[^/]+(\/[^/]+)?$/;
     if (openRoutes.includes(req.path) || dynamicOpenRoutes.test(req.path)) {
         console.log('Open route accessed:', req.path);

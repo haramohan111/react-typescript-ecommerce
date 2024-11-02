@@ -33,29 +33,21 @@ const orderSchema = new mongoose_1.Schema({
     },
     razorpay_order_id: {
         type: String,
-        required: true,
     },
     razorpay_payment_id: {
         type: String,
-        required: true,
     },
     razorpay_signature: {
         type: String,
-        required: true,
     },
     orderItems: [
         {
-            name: {
-                type: String,
-                required: true,
-            },
-            qty: {
+            quantity: {
                 type: Number,
                 required: true,
             },
             image: {
                 type: String,
-                required: true,
             },
             price: {
                 type: Number,
@@ -69,22 +61,9 @@ const orderSchema = new mongoose_1.Schema({
         },
     ],
     shippingAddress: {
-        address: {
-            type: String,
-            required: true,
-        },
-        city: {
-            type: String,
-            required: true,
-        },
-        postalCode: {
-            type: String,
-            required: true,
-        },
-        country: {
-            type: String,
-            required: true,
-        },
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: "Customer",
+        required: true,
     },
     payment: {
         type: String,

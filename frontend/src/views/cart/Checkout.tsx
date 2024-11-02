@@ -7,7 +7,7 @@ import { ReactComponent as IconReceipt } from "bootstrap-icons/icons/receipt.svg
 import { ReactComponent as IconCreditCard2Front } from "bootstrap-icons/icons/credit-card-2-front.svg";
 import { ReactComponent as IconCart3 } from "bootstrap-icons/icons/cart3.svg";
 import { CartList } from "../../actions/cartAction";
-import { createOrder } from "../../actions/orderAction";
+import { createOrder, manageCustomer } from "../../actions/orderAction";
 import { useAuth } from "../../context/auth";
 import { useNavigate } from "react-router-dom";
 import { ThunkDispatch } from 'redux-thunk';
@@ -19,18 +19,6 @@ declare global {
 }
 
 const CheckoutView = () => {
-  const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
-  const [email, setEmail] = useState<string>('');
-  const [mobile, setMobile] = useState<string>('');
-  const [name, setName] = useState<string>('');
-  const [address, setAddress] = useState<string>('');
-  const [addressoptional, setAddressoptional] = useState<string>('');
-  const [country, setCountry] = useState<string>('');
-  const [state, setState] = useState<string>('');
-  const [zip, setZip] = useState<string>('');
-  const [inputValue, setInputValue] = useState<string>('');
-  const isDefault = true;
-  const navigate = useNavigate()
 
   interface CartItem {
     id: string;
@@ -39,13 +27,13 @@ const CheckoutView = () => {
     price: number;
   }
 
-  
+
   interface Cart {
     totalPrice: any;
     allCart: CartItem[];
 
   }
-  
+
   interface CartState {
     totalPrice: any;
     allCart: any;
@@ -53,27 +41,64 @@ const CheckoutView = () => {
     shippingAddress: string;
     paymentMethod: string;
   }
-  
-  interface RootState{
-      cartreducer:CartState
+
+  interface RootState {
+    cartreducer: CartState
   }
 
-  interface UserState{
-    loginInfo :[],
+  interface UserState {
+    loginInfo: [],
     register: [], // Initialize register
     authcheck: [], // Initialize authcheck
   }
-  interface userRootreducer{
-    userreducer:UserState
+  interface userRootreducer {
+    orderreducer: any;
+    userreducer: UserState
   }
+  const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
+  const [email, setEmail] = useState<string>('');
+  const [mobile, setMobile] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [address, setAddress] = useState<string>('');
+  const [addressoptional, setAddressoptional] = useState<string>('');
+  const [state, setState] = useState<string>('');
+  const [city, setCity] = useState<string>('');
+  const [zip, setZip] = useState<string>('');
+  const [cities, setCities] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState<string>('');
+  const [selectedState, setSelectedState] = useState<string>('');
+  const isDefault = true;
+  const navigate = useNavigate()
 
+  const states = ['Odisha', 'Maharashtra', 'Karnataka'];
+  const stateCities:{ [key: string]: string[] } = {
+    'Odisha': ['Cuttack', 'Bhubaneswar', 'Puri'],
+    'Maharashtra': ['Mumbai', 'Pune', 'Nagpur'],
+    'Karnataka': ['Bangalore', 'Mysore', 'Hubli']
+  };
+  const handleStateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+     const state = event.target.value; 
+    setSelectedState(state);
+     setCities(stateCities[state]);
+   };
   const [auth] = useAuth();
-  const[checklog,setChecklog]= useState<boolean>(false);
-  const cart = useSelector((state:RootState) => state.cartreducer)
+  const [checklog, setChecklog] = useState<boolean>(false);
+  const cart = useSelector((state: RootState) => state.cartreducer)
 
-  const userLogin = useSelector((state:userRootreducer) => state.userreducer);
+  const userLogin = useSelector((state: userRootreducer) => state.userreducer);
   const { loginInfo } = userLogin;
-  console.log(loginInfo);
+  const { customers } = useSelector((state: userRootreducer) => state.orderreducer);
+  console.log(customers);
+
+  const handleAddressSelect = (address: any) => {
+    setEmail(address.email);
+    setMobile(address.phone);
+    setName(address.name);
+    setAddress(address.address);
+    setState(address.state);
+    setCity(address.city);
+    setZip(address.zip)
+  };
   useEffect(() => {
     if (auth) {
       setChecklog(true);
@@ -82,19 +107,20 @@ const CheckoutView = () => {
     }
   }, [auth]);
   useEffect(() => {
-    if (checklog) {
+    // if (checklog) {
 
-      navigate("/account/signin")
-    }
+    //   navigate("/account/signin")
+    // }
     dispatch(CartList())
+    dispatch(manageCustomer())
   }, [loginInfo])
 
-
+ 
   const payClick = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault()
 
     const shippingAdd = {
-      email, mobile, name, address, country, state
+      email, mobile, name, address, city, state, postalCode: zip,
     }
     dispatch(
       createOrder({
@@ -105,20 +131,22 @@ const CheckoutView = () => {
         shippingPrice: "50",
         taxPrice: "1000",
         totalPrice: "1000",
+        postalCode: zip,
+        city: state,
       }))
     ///const { data: { key } } = await axios.get("http://www.localhost:8000/api/getkey")
 
-    const { data } = await axios.post("http://localhost:8000/api/v1/payment")
-
+    const { data } = await axios.post("http://localhost:9000/api/v1/payment")
+console.log(data)
     const options = {
-      key: "rzp_test_kBoXk4iwEmjhAN",
+      key: "rzp_test_8sbyXFCLzRr4Kf",
       amount: data.order.amount,
       currency: "INR",
       name: "Flipmart Ecommerce private Ltd",
       description: "Ecommerce company",
       image: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fbuiltin.com%2Fe-commerce&psig=AOvVaw0_ouVUJ_sYocADw5J3NlNh&ust=1691836612545000&source=images&cd=vfe&opi=89978449&ved=0CA4QjRxqFwoTCPilsdS01IADFQAAAAAdAAAAABAD",
       order_id: data.order.id,
-      callback_url: "http://localhost:8000/api/v1/paymentverify",
+      callback_url: "http://localhost:9000/api/v1/paymentverify",
       prefill: {
         name: "haramohan mahalik",
         email: "haramohan111@gmail.com",
@@ -131,11 +159,15 @@ const CheckoutView = () => {
         "color": "#121212"
       }
     };
-    const razor = new window.Razorpay(options);
-    razor.open();
-
-
+    // Ensure Razorpay is loaded before this code runs
+    if (typeof Razorpay !== 'undefined') {
+      const razorpayInstance = new Razorpay(options);
+      razorpayInstance.open();
+    } else {
+      console.error('Razorpay SDK is not loaded.');
+    }
   }
+
   return (
     <React.Fragment>
       <div className="bg-secondary border-top p-4 text-white mb-3">
@@ -156,6 +188,7 @@ const CheckoutView = () => {
                       className="form-control"
                       placeholder="Email Address"
                       aria-label="Email Address"
+                      value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
@@ -165,6 +198,7 @@ const CheckoutView = () => {
                       className="form-control"
                       placeholder="Mobile no"
                       aria-label="Mobile no"
+                      value={mobile}
                       onChange={(e) => setMobile(e.target.value)}
                     />
                   </div>
@@ -183,6 +217,7 @@ const CheckoutView = () => {
                       type="text"
                       className="form-control"
                       onChange={(e) => setName(e.target.value)}
+                      value={name}
                       placeholder="Name"
                       required
                     />
@@ -192,6 +227,7 @@ const CheckoutView = () => {
                       type="text"
                       className="form-control"
                       onChange={(e) => setAddress(e.target.value)}
+                      value={address}
                       placeholder="Addresss"
                       required
                     />
@@ -205,15 +241,15 @@ const CheckoutView = () => {
                     />
                   </div>
                   <div className="col-md-4">
-                    <select onChange={(e) => setCountry(e.target.value)} className="form-select" required>
-                      <option >-- Country --</option>
-                      <option>United States</option>
+                    <select onChange={handleStateChange} value={state} className="form-select" required>
+                      <option value="">-- Country --</option>
+                      {states.map(state => ( <option key={state} value={state}>{state}</option> ))}
                     </select>
                   </div>
                   <div className="col-md-4">
                     <select onChange={(e) => setState(e.target.value)} className="form-select" required>
                       <option >-- State --</option>
-                      <option>California</option>
+                      {cities.map(city => ( <option key={city} value={city}>{city}</option> ))}
                     </select>
                   </div>
                   <div className="col-md-4">
@@ -222,6 +258,7 @@ const CheckoutView = () => {
                       onChange={(e) => setZip(e.target.value)}
                       className="form-control"
                       placeholder="Zip"
+                      value={zip}
                       required
                     />
                   </div>
@@ -236,7 +273,7 @@ const CheckoutView = () => {
                   <input
                     className="form-check-input"
                     type="checkbox"
-                    defaultValue = {isDefault ? 'default value' : inputValue}
+                    defaultValue={isDefault ? 'default value' : inputValue}
                     id="flexCheckDefault"
                   />
                   <label
@@ -276,8 +313,8 @@ const CheckoutView = () => {
                     />
                   </div>
                   <div className="col-md-4">
-                    <select className="form-select" value={country} required>
-                      <option >-- Country --</option>
+                    <select className="form-select" value={state} required>
+                      <option >-- State --</option>
                       <option>United States</option>
                     </select>
                   </div>
@@ -419,15 +456,15 @@ const CheckoutView = () => {
                 <span className="badge bg-secondary float-end">3</span>
               </div>
               <ul className="list-group list-group-flush">
-             { cart?.cart?.allCart?.map((cartlist: any) => (
-                <li className="list-group-item d-flex justify-content-between lh-sm">
-                  <div>
-                    <h6 className="my-0">{cartlist.product_id.name}</h6>
-                    <small className="text-muted">Brief description</small>
-                  </div>
-                  <span className="text-muted">{cartlist.product_id.price}</span>
-                </li>
-             ))}
+                {cart?.cart?.allCart?.map((cartlist: any) => (
+                  <li className="list-group-item d-flex justify-content-between lh-sm">
+                    <div>
+                      <h6 className="my-0">{cartlist.product_id.name}</h6>
+                      <small className="text-muted">Brief description</small>
+                    </div>
+                    <span className="text-muted">{cartlist.product_id.price}</span>
+                  </li>
+                ))}
                 {/* <li className="list-group-item d-flex justify-content-between bg-light">
                   <div className="text-success">
                     <h6 className="my-0">Promo code</h6>
@@ -441,7 +478,37 @@ const CheckoutView = () => {
                 </li>
               </ul>
             </div>
+            <hr></hr>
+            <div className="card">
+              <div className="card-header">
+                <IconCart3 className="i-va" /> Address{" "}
+                <span className="badge bg-secondary float-end">3</span>
+              </div>
+              <ul className="list-group list-group-flush">
+                {customers?.map((list: any) => (
+                  <button onClick={() => handleAddressSelect(list)}>
+                    <li className="list-group-item d-flex justify-content-between lh-sm">
+                      <div>
+                        <h6 className="my-0">Name : -<span className="text-muted">{list.name}</span></h6>
+                        <h6 className="my-1">Email : -  <span className="text-muted">{list.email}</span></h6>
+                        <h6 className="my-0">Phone : -   <span className="text-muted">{list.phone}</span></h6>
+                        <h6 className="my-1">State : -  <span className="text-muted">{list.state}</span></h6>
+                        <h6 className="my-0">City : -   <span className="text-muted">{list.city}</span></h6>
+                        <h6 className="my-0">Address : -   <span className="text-muted">{list.address}</span></h6>
+                      </div>
+                    </li>
+                  </button>
+                ))}
+
+                <li className="list-group-item d-flex justify-content-between">
+                  <span></span>
+                  <strong>Edit</strong>
+                </li>
+              </ul>
+            </div>
           </div>
+
+
         </div>
       </div>
     </React.Fragment>

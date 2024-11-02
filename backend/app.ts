@@ -27,7 +27,7 @@ app.use(cookieParser());
 app.use(session({
   secret: 'ghfffniyiuyiyiynn789789', // Change this to a strong secret
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
   store: MongoStore.create({ mongoUrl: 'mongodb://localhost:27017/react-typescript-ecommerce' }), // Store sessions in MongoDB
   cookie: {
     secure: false, // Set to true if using HTTPS
@@ -35,6 +35,8 @@ app.use(session({
     sameSite: 'strict', // CSRF protection
 },
 }));
+
+
 // Get the current date and time in India (IST)
 const indiaTime = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
 console.log(`Current date and time in India: ${indiaTime}`);
@@ -48,7 +50,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   console.log("req.path",req.path);
   const openRoutes = ['/api/v1/adminlogin', '/api/v1/managefrontcategory', 
     '/api/v1/cart', '/api/v1/products', '/api/v1/logout', '/api/v1/refresh', 
-    '/api/v1/verify','/api/v1/userlogin','/api/v1/userrefresh','/api/v1/signup','/api/v1/userverify','/api/v1/userlogout'];
+    '/api/v1/verify','/api/v1/userlogin','/api/v1/userrefresh','/api/v1/signup',
+    '/api/v1/userverify','/api/v1/userlogout','/api/v1/payment',"/api/v1/paymentverify","/set-session",
+    "/api/v1/get-session","/api/v1/get-sessions"];
     const dynamicOpenRoutes = /^\/api\/v1\/(addtocart|incqty|descqty|deletecart|productbyid)\/[^/]+(\/[^/]+)?$/;
   if (openRoutes.includes(req.path) || dynamicOpenRoutes.test(req.path)) {
     console.log('Open route accessed:', req.path);
@@ -57,6 +61,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   //console.log('Protected route accessed:', req.path);
   protect(req, res, next);
 });
+
+
 
 //app.use(protect) this is for all route
 //end

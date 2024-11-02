@@ -78,7 +78,9 @@ exports.loginUser = (0, express_async_handler_1.default)((req, res) => __awaiter
             if (user) {
                 // Ensure _id is asserted to be a string
                 // req.session.cookie.maxAge = 1000 * 60 * 60;
-                //req.session.userId = user._id.toString();
+                const uid = user._id.toString();
+                req.session.userId = uid;
+                console.log(req.session);
                 const user_session_id = "id" + Math.random().toString(16).slice(2);
                 req.session.user_session_id = user_session_id;
                 const userId = new mongoose_1.default.Types.ObjectId(user._id);

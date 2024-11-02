@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 // Interface for OrderItems
 interface IOrderItem extends Document {
+  _id:mongoose.Types.ObjectId;
   name: string;
   qty: number;
   image: string;
@@ -27,6 +28,7 @@ interface IPaymentResults extends Document {
 
 // Interface for Order
 interface IOrder extends Document {
+  _id:mongoose.Types.ObjectId;
   user: mongoose.Types.ObjectId;
   razorpay_order_id: string;
   razorpay_payment_id: string;
@@ -56,29 +58,24 @@ const orderSchema: Schema = new Schema({
   },
   razorpay_order_id: {
     type: String,
-    required: true,
+
   },
   razorpay_payment_id: {
     type: String,
-    required: true,
+
   },
   razorpay_signature: {
     type: String,
-    required: true,
+
   },
   orderItems: [
     {
-      name: {
-        type: String,
-        required: true,
-      },
-      qty: {
+      quantity: {
         type: Number,
         required: true,
       },
       image: {
         type: String,
-        required: true,
       },
       price: {
         type: Number,
@@ -92,22 +89,9 @@ const orderSchema: Schema = new Schema({
     },
   ],
   shippingAddress: {
-    address: {
-      type: String,
-      required: true,
-    },
-    city: {
-      type: String,
-      required: true,
-    },
-    postalCode: {
-      type: String,
-      required: true,
-    },
-    country: {
-      type: String,
-      required: true,
-    },
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Customer",
+    required: true,
   },
   payment: {
     type: String,

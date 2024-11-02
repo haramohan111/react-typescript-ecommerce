@@ -23,7 +23,7 @@ interface SignInFormValues {
 }
 
 const SignInView = () => {
-
+  const [auth] = useAuth();
   let navigate = useNavigate();
   const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
   const {loading,error,login} = useSelector((state:userRootreducer)=>state.userreducer)
@@ -34,7 +34,11 @@ const SignInView = () => {
    dispatch(loginUser(values,navigate,toast))
   };
 
-
+  useEffect(() => {
+    if (auth) {
+   navigate("/")
+    } 
+  }, [auth]);
  
     return (
       <>

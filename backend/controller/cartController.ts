@@ -113,7 +113,7 @@ export const cartList = AsyncHandler(async (req: Request, res: Response): Promis
  // Calculate the total price based on cart_session_id
  const totalPrice = await cartModel.aggregate([
     {
-        $match: {cart_session_id: cartSessionId,}
+        $match: {cart_session_id: cartSessionId,status:1}
     },
      {
          $group: {
@@ -124,7 +124,7 @@ export const cartList = AsyncHandler(async (req: Request, res: Response): Promis
  ]);
 
  // Fetch all cart items for the given cart_session_id
- const allCart = await cartModel.find({ cart_session_id: cartSessionId })
+ const allCart = await cartModel.find({ cart_session_id: cartSessionId,status:1 })
      .populate({ path: 'product_id' });
      const userId = req.session.userId;
 

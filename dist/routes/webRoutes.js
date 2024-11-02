@@ -39,6 +39,7 @@ router.post('/adminlogin', (req, res, next) => (0, adminloginController_1.adminL
 // router.get("/authcheck/:id", (req: Request, res: Response, next: NextFunction) => authCheck(req, res, next));
 router.post('/createorder', (req, res, next) => (0, orderController_1.createOrder)(req, res, next));
 router.get('/orderpagination', (req, res, next) => (0, orderController_1.orderPagination)(req, res, next));
+router.get('/customeraddress', (req, res, next) => (0, orderController_1.customerAddress)(req, res, next));
 router.post('/logout', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const authHeader = req.headers.authorization;

@@ -31,6 +31,10 @@ const cartSchema: Schema = new Schema({
   price: {
     type: Number,
     required: [true, 'Price is required']
+  },
+  status:{
+    type:Number,
+    default:1
   }
 }, { timestamps: true });
 
