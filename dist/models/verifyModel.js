@@ -38,8 +38,7 @@ const verifySchema = new mongoose_1.Schema({
         type: String,
     },
     user_session_id: {
-        type: String,
-        required: true
+        type: String
     },
     expireAt: {
         type: Date,

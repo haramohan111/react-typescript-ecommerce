@@ -4,7 +4,7 @@ import moment from 'moment-timezone';
 export interface IVerify extends Document {
     _id: string;
     user_id: mongoose.Types.ObjectId;
-    user_session_id:string;
+    user_session_id?:string;
     token: string;
     expireAt: Date;
 }
@@ -19,8 +19,7 @@ const verifySchema: Schema<IVerify> = new Schema({
         type: String,
     },
     user_session_id: {
-        type: String,
-        required: true
+        type: String
     },
     expireAt: {
         type: Date,

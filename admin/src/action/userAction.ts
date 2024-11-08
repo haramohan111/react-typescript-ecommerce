@@ -29,7 +29,7 @@ export const adminLogin = (email: string, password: string, navigate: (path: str
         const { data } = await api.post("/api/v1/adminlogin", { email, password });
         
         navigate("/dashboard");
-        console.log(data);
+     
         
         dispatch({ type: USER_SUCCESS, payload: data });
         toast.success("Login successfully");
