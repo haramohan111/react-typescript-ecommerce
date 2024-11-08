@@ -14,11 +14,13 @@ const root = ReactDOM.createRoot(
 root.render(
 
   <Provider store={store}>
-    <AuthProvider>
+
     <CartProvider>
+    
       <App />
+   
     </CartProvider>
-    </AuthProvider>
+ 
   </Provider>
 );
 

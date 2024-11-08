@@ -37,24 +37,12 @@ interface RootState {
 
 const Header: React.FC = () => {
   const [cartItems] = useCart();
-  const [auth] = useAuth();
-  // const userList = useSelector((state: RootState) => state.userreducer);
-  // const { loginInfo,userverify } = userList;
-  //const[checklog,setChecklog]= useState<boolean>(false);
+
+  const userList = useSelector((state: RootState) => state.userreducer);
+  const { loginInfo,userverify } = userList;
+
   const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
   const navigate = useNavigate();
-  console.log(auth)
-  // useEffect(() => {
-  //   dispatch(verifyUser());
-  // }, [dispatch]);
-
-  // useEffect(() => {
-  //   if (auth) {
-  //     setChecklog(true);
-  //   } else {
-  //     setChecklog(false);
-  //   }
-  // }, [auth]);
 
   const handleLogout = () => {
     dispatch(userlogout(navigate));
@@ -84,7 +72,7 @@ const Header: React.FC = () => {
                   )}
                 </Link>
               </div>
-              {  auth?(
+              {  userverify.success?(
                 <div className="btn-group">
                   <button
                     type="button"

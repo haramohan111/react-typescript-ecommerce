@@ -2,7 +2,7 @@ import React, { useState, lazy, useEffect } from "react";
 import { ThunkDispatch } from 'redux-thunk';
 import { AnyAction } from 'redux';
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { ToastContainer} from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as IconHeartFill } from "bootstrap-icons/icons/heart-fill.svg";
 import { ReactComponent as IconTrash } from "bootstrap-icons/icons/trash.svg";
@@ -19,7 +19,7 @@ import { useAuth } from "../../context/auth";
 
 const CouponApplyForm = lazy(() => import("../../components/others/CouponApplyForm"));
 interface CartItem {
-  _id:string;
+  _id: string;
   product_id: any;
   id: string;
   name: string;
@@ -45,66 +45,63 @@ interface CartState {
   cartItems: any[]
 }
 
-interface RootState{
-    cartreducer:CartState
+interface RootState {
+  cartreducer: CartState
 }
 
-interface UserState{
-  loginInfo :{
-    success:string[],
+interface UserState {
+  loginInfo: {
+    success: string[],
+  }
+  userverify:{
+    success:boolean
   }
   register: [], // Initialize register
   authcheck: [], // Initialize authcheck
 }
-interface userRootreducer{
-  userreducer:UserState
+interface userRootreducer {
+  userreducer: UserState
 }
 const CartView = () => {
   const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
-  const [cartc,setCartc] = useCart()
-  const [auth] = useAuth();
-  // const[checklog,setChecklog]= useState<boolean>(false);
-  const cartList = useSelector((state:RootState) => state.cartreducer)
-  const {  cart,cartItems } = cartList
+  const [cartc, setCartc] = useCart()
 
-  // const userList = useSelector((state:userRootreducer)=>state.userreducer)
-  // const {loginInfo} = userList
-  // console.log( cartList)
+  // const[checklog,setChecklog]= useState<boolean>(false);
+  const cartList = useSelector((state: RootState) => state.cartreducer)
+  const { cart, cartItems } = cartList
+
+  const userList = useSelector((state:userRootreducer)=>state.userreducer)
+  const {loginInfo,userverify} = userList
+  console.log("userverify", userverify)
   // console.log( userList)
   const navigate = useNavigate()
-  const increaseqty = (ids: string) =>{
+  const increaseqty = (ids: string) => {
     dispatch(increaseQty(ids))
   }
 
-  const descreseqty = (id: string) =>{
+  const descreseqty = (id: string) => {
     dispatch(decreaseQty(id))
   }
 
-  const deleteCart = (cartid: string,qty: number | undefined) =>{
+  const deleteCart = (cartid: string, qty: number | undefined) => {
 
-   try{
+    try {
 
       let myCart = [...cartc]
-      myCart.splice(0,qty)
+      myCart.splice(0, qty)
       setCartc(myCart)
-    dispatch(removeCart(cartid))
-  }catch(e){
-    console.log(e)
+      dispatch(removeCart(cartid))
+    } catch (e) {
+      console.log(e)
+    }
   }
-  }
-  console.log(auth)
-  // useEffect(() => {
-  //   if (auth) {
-  //     setChecklog(true);
-  //   } else {
-  //     setChecklog(false);
-  //   }
-  // }, [auth]);
+
+
   useEffect(() => {
-    if(localStorage.getItem("cpcode")){
+    if (localStorage.getItem("cpcode")) {
       dispatch(coupon(localStorage.getItem("cpcode") as string))
-      
-    }else{
+
+    } else {
       dispatch(CartList())
     }
 
@@ -113,42 +110,44 @@ const CartView = () => {
   const onSubmitApplyCouponCode = async (values: { coupon: string; }) => {
     //alert(JSON.stringify(values));
     localStorage.removeItem("cpcode");
-    localStorage.setItem("cpcode",values.coupon)
+    localStorage.setItem("cpcode", values.coupon)
     dispatch(coupon(values.coupon))
   };
-  console.log(cart?.allCart?.length,"cart length")
+  console.log(cart?.allCart?.length, "cart length")
   // console.log(cartc?.length,"quantity")
   // console.log(cart?.allcart?.length !==cartc?.length,"check")
-  const removeItemCart = (pid: any) =>{
-    try{
-      if(cart?.allCart?.length !==cartc?.length){
-  
+  const removeItemCart = (pid: any) => {
+    try {
+      if (cart?.allCart?.length !== cartc?.length) {
+
         let myCart = [...cartc]
-        let index = myCart.findIndex((item)=>item._id == pid)
-        myCart.splice(index,1)
+        let index = myCart.findIndex((item) => item._id == pid)
+        myCart.splice(index, 1)
         setCartc(myCart)
       }
 
-    }catch(e){
+    } catch (e) {
       console.log(e)
     }
   }
+console.log(cart?.allCart?.length)
+  const handleCheckout = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>): void => {
+    event.preventDefault();
+    if (cart?.allCart?.length === undefined) {
+      console.log("a")
+      navigate("/")
+    } else {
+      console.log("b")
+      navigate("/checkout")
+    }
 
-  const handleCheckout =(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>): void =>{
-  event.preventDefault();
- if(cart?.allCart?.length == 0){
-  navigate("/")
- }else{
-  navigate("/checkout")
- }
 
- 
-    
+
   }
 
   return (
     <React.Fragment>
-       <ToastContainer/>
+      <ToastContainer />
       <div className="bg-secondary border-top p-4 text-white mb-3">
         <h1 className="display-6">Shopping Cart</h1>
       </div>
@@ -204,7 +203,7 @@ const CartView = () => {
                               <button
                                 className="btn btn-primary text-white"
                                 type="button"
-                                onClick={() =>{descreseqty(cartlist._id);removeItemCart(cartlist.product_id)}}
+                                onClick={() => { descreseqty(cartlist._id); removeItemCart(cartlist.product_id) }}
                               >
                                 <FontAwesomeIcon icon={faMinus} />
                               </button>
@@ -216,7 +215,7 @@ const CartView = () => {
                               <button
                                 className="btn btn-primary text-white"
                                 type="button"
-                                onClick={()=>{increaseqty(cartlist._id);setCartc([...cartc,cartlist.product_id])}}
+                                onClick={() => { increaseqty(cartlist._id); setCartc([...cartc, cartlist.product_id]) }}
                               >
                                 <FontAwesomeIcon icon={faPlus} />
                               </button>
@@ -225,15 +224,15 @@ const CartView = () => {
                           <td>
                             <var className="price">&#8360; {cartlist.price}</var>
                             <small className="d-block text-muted">
-                            &#8360; {cartlist.product_id.price} each
+                              &#8360; {cartlist.product_id.price} each
                             </small>
                           </td>
                           <td className="text-end">
 
-                            <button  className={`btn btn-sm btn-outline-${"danger"} me-2`}>
+                            <button className={`btn btn-sm btn-outline-${"danger"} me-2`}>
                               <IconHeartFill className="i-va" />
                             </button>
-                            <button onClick={ () =>{deleteCart(cartlist._id,cartlist.quantity)}} className="btn btn-sm btn-outline-danger">
+                            <button onClick={() => { deleteCart(cartlist._id, cartlist.quantity) }} className="btn btn-sm btn-outline-danger">
                               <IconTrash className="i-va" />
                             </button>
                           </td>
@@ -267,18 +266,18 @@ const CartView = () => {
                 <CouponApplyForm onSubmit={onSubmitApplyCouponCode} />
                 {cart?.desc}
               </div>
-              
+
             </div>
             <div className="card">
               <div className="card-body">
                 <dl className="row border-bottom">
                   <dt className="col-6">Total price:</dt>
-           
-                    
+
+
                   <dd className="col-6 text-end" >{cart?.totalPrice}</dd>
-                   
-          
-                  
+
+
+
 
                   <dt className="col-6 text-success">Discount:</dt>
                   <dd className="col-6 text-success text-end">-&#8360; {cart?.discountvalue}0</dd>

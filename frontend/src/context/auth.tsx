@@ -40,8 +40,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const userList = useSelector((state: RootState) => state.userreducer);
   const { userverify } = userList;
   const [auth, setAuth] = useState<AuthContextType>(false);
-  console.log(userverify)
-  console.log(auth)
+  console.log("auth.tsx")
   useEffect(() => {
     const checkAuth = async () => {
     console.log("verifyUser")

@@ -48,6 +48,9 @@ const CheckoutView = () => {
 
   interface UserState {
     loginInfo: [],
+    userverify: {
+      success: boolean;
+    },
     register: [], // Initialize register
     authcheck: [], // Initialize authcheck
   }
@@ -71,24 +74,24 @@ const CheckoutView = () => {
   const navigate = useNavigate()
 
   const states = ['Odisha', 'Maharashtra', 'Karnataka'];
-  const stateCities:{ [key: string]: string[] } = {
+  const stateCities: { [key: string]: string[] } = {
     'Odisha': ['Cuttack', 'Bhubaneswar', 'Puri'],
     'Maharashtra': ['Mumbai', 'Pune', 'Nagpur'],
     'Karnataka': ['Bangalore', 'Mysore', 'Hubli']
   };
   const handleStateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-     const state = event.target.value; 
+    const state = event.target.value;
     setSelectedState(state);
-     setCities(stateCities[state]);
-   };
-  const [auth] = useAuth();
-  const [checklog, setChecklog] = useState<boolean>(false);
+    setCities(stateCities[state]);
+  };
+  // const [auth] = useAuth();
+  // const [checklog, setChecklog] = useState<boolean>(false);
   const cart = useSelector((state: RootState) => state.cartreducer)
 
   const userLogin = useSelector((state: userRootreducer) => state.userreducer);
-  const { loginInfo } = userLogin;
+  const { userverify } = userLogin;
   const { customers } = useSelector((state: userRootreducer) => state.orderreducer);
-  console.log(customers);
+  console.log(userverify);
 
   const handleAddressSelect = (address: any) => {
     setEmail(address.email);
@@ -99,23 +102,23 @@ const CheckoutView = () => {
     setCity(address.city);
     setZip(address.zip)
   };
+  // useEffect(() => {
+  //   if (auth) {
+  //     setChecklog(true);
+  //   } else {
+  //     setChecklog(false);
+  //   }
+  // }, [auth]);
   useEffect(() => {
-    if (auth) {
-      setChecklog(true);
-    } else {
-      setChecklog(false);
-    }
-  }, [auth]);
-  useEffect(() => {
-    // if (checklog) {
+    if (!userverify.success) {
 
-    //   navigate("/account/signin")
-    // }
+      navigate("/account/signin")
+    }
     dispatch(CartList())
     dispatch(manageCustomer())
-  }, [loginInfo])
+  }, [userverify])
 
- 
+
   const payClick = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault()
 
@@ -137,7 +140,7 @@ const CheckoutView = () => {
     ///const { data: { key } } = await axios.get("http://www.localhost:8000/api/getkey")
 
     const { data } = await axios.post("http://localhost:9000/api/v1/payment")
-console.log(data)
+    console.log(data)
     const options = {
       key: "rzp_test_8sbyXFCLzRr4Kf",
       amount: data.order.amount,
@@ -243,13 +246,13 @@ console.log(data)
                   <div className="col-md-4">
                     <select onChange={handleStateChange} value={state} className="form-select" required>
                       <option value="">-- Country --</option>
-                      {states.map(state => ( <option key={state} value={state}>{state}</option> ))}
+                      {states.map(state => (<option key={state} value={state}>{state}</option>))}
                     </select>
                   </div>
                   <div className="col-md-4">
                     <select onChange={(e) => setState(e.target.value)} className="form-select" required>
                       <option >-- State --</option>
-                      {cities.map(city => ( <option key={city} value={city}>{city}</option> ))}
+                      {cities.map(city => (<option key={city} value={city}>{city}</option>))}
                     </select>
                   </div>
                   <div className="col-md-4">

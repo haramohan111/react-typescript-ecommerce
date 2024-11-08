@@ -22,23 +22,37 @@ interface SignInFormValues {
   password: string;
 }
 
+interface UserState {
+  loginInfo: {
+    success: string[],
+  }
+  userverify:{
+    success:boolean;
+  }
+  register: [], // Initialize register
+  authcheck: [], // Initialize authcheck
+}
+interface userRootreducer {
+  userreducer: UserState
+}
 const SignInView = () => {
-  const [auth] = useAuth();
+
   let navigate = useNavigate();
   const dispatch: ThunkDispatch<any, any, AnyAction> = useDispatch();
-  const {loading,error,login} = useSelector((state:userRootreducer)=>state.userreducer)
-
-
+  //const {loading,error,login} = useSelector((state:userRootreducer)=>state.userreducer)
+  const userList = useSelector((state:userRootreducer)=>state.userreducer)
+  const {userverify} = userList
+console.log(userverify.success)
   const onSubmit = async (values:SignInFormValues) => {
   // alert(JSON.stringify(values));
    dispatch(loginUser(values,navigate,toast))
   };
 
   useEffect(() => {
-    if (auth) {
+    if (userverify.success) {
    navigate("/")
     } 
-  }, [auth]);
+  }, [userverify]);
  
     return (
       <>

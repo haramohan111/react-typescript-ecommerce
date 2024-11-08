@@ -40,7 +40,7 @@ const PrivateRoute: React.FC = () => {
     const atoken = JSON.parse(localStorage.getItem('refreshToken')!);
     try {
       const response = await axios.post(`${apiUrl}/api/v1/verify`, { atoken });
-      console.log(response.data.success)
+
       setCheckauth(response.data.success);
     } catch (error) {
       console.error(error);

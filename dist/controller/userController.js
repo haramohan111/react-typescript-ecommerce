@@ -84,12 +84,11 @@ exports.loginUser = (0, express_async_handler_1.default)((req, res) => __awaiter
                 const user_session_id = "id" + Math.random().toString(16).slice(2);
                 req.session.user_session_id = user_session_id;
                 const userId = new mongoose_1.default.Types.ObjectId(user._id);
-                yield verifyModel_1.default.create({ user_id: userId, user_session_id });
-                // const verify = await Verify.find({user_id:userId});
-                // let verifyuser;
-                // if(!verify){
-                // verifyuser = await Verify.create({user_id: userId});
-                // }
+                let verifyuser;
+                const verify = yield verifyModel_1.default.findOne({ user_id: user._id });
+                if (!verify) {
+                    verifyuser = yield verifyModel_1.default.create({ user_id: user._id, user_session_id });
+                }
                 const encryptedData = (0, generateToken_1.verifyToken)(user._id.toString());
                 res.cookie('uid', encryptedData, { maxAge: 24 * 60 * 1000, httpOnly: false });
                 res.status(200).send({

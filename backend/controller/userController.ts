@@ -118,12 +118,13 @@ export const loginUser = asyncHandler(async (req: Request, res: Response): Promi
                 const user_session_id= "id" + Math.random().toString(16).slice(2)
                 req.session.user_session_id = user_session_id;
                 const userId = new mongoose.Types.ObjectId(user._id);
-                await Verify.create({user_id: userId,user_session_id});
-                // const verify = await Verify.find({user_id:userId});
-                // let verifyuser;
-                // if(!verify){
-                // verifyuser = await Verify.create({user_id: userId});
-                // }
+
+                let verifyuser;
+                const verify = await Verify.findOne({user_id:user._id});
+                
+                if(!verify){
+                verifyuser = await Verify.create({user_id: user._id,user_session_id});
+                }
                 const encryptedData = verifyToken(user._id.toString());
                 res.cookie('uid', encryptedData,{ maxAge: 24 * 60 * 1000, httpOnly: false})
                 res.status(200).send({
